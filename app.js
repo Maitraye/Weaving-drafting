@@ -1,9 +1,9 @@
-var threadWidth = 50; // cell width; for instructor view max value was 48 for 6 shafts and col-md-8
+var threadWidth = 62; // cell width; for instructor view max value was 48 for 6 shafts and col-md-8
 var threadSpacing = 10; // drawdown gridlines
 
-// will need this for saving and loading WIFs
-// var maxWefts = 64;
-// var maxWarps = 64;
+var warpColor;
+var weftColor;
+var tieupColor = "#555";
 
 function RGBToHex(rgb) {
   rgb = rgb.split(',');
@@ -22,22 +22,23 @@ function RGBToHex(rgb) {
   return "#" + r + g + b;
 }
 
-// var warpColor = RGBToHex(draft['COLOR TABLE'][draft.WARP.Color]);
-// var weftColor = RGBToHex(draft['COLOR TABLE'][draft.WEFT.Color]);
-var warpColor;
-var weftColor;
-var tieupColor = "#555";
-
-var drawdownArray = [null];
-
 // load sounds
 var threadingSounds = [];
 var treadlingSounds = [];
 var tieupSounds = [];
 
-// to implement double tap
-var timeout;
-var lastTap = 0;
+function loadSounds(instrumentName, soundArray) {
+	var folderName = './sounds/';
+	for (var i=0; i<8; i++) {
+		audioName = folderName + instrumentName + i + '.mp3';
+		// const blobUrl = window.createObjectURL(audioName);
+		var sound = new Howl({
+  			src: [audioName],
+  			html5: true 
+		});
+		soundArray.push(sound);
+	}
+}
 
 // If you include your js files in the head of your document, make sure to wait for the DOM to be loaded:
 // This is not an issue if you include your js at the bottom.
@@ -56,7 +57,6 @@ SVG.on(document, 'DOMContentLoaded', function() {
 	warpColor = RGBToHex(draft['COLOR TABLE'][draft.WARP.Color]);
 	weftColor = RGBToHex(draft['COLOR TABLE'][draft.WEFT.Color]);
 	computeNewDraft();
-	
 });
 
 // updating warp and weft color based on user input in drawdown button
@@ -86,17 +86,69 @@ $('#weftInstrument').change(function () {
   loadSounds(selectedWeftInstrument, treadlingSounds);
 });
 
-function loadSounds(instrumentName, soundArray) {
-	var folderName = './sounds/';
-	for (var i=0; i<8; i++) {
-		audioName = folderName + instrumentName + i + '.mp3';
-		// const blobUrl = window.createObjectURL(audioName);
-		var sound = new Howl({
-  			src: [audioName],
-  			html5: true 
-		});
-		soundArray.push(sound);
-	}
+// to implement double tap
+var timeout;
+var lastTap = 0;
+var lastTouchEventX = 0;
+var lastTouchEventY = 0;
+
+function tapHandler(element, elementType, draftSequence, cellColor, event) {
+  var currentTime = new Date().getTime();
+  var tapLength = currentTime - lastTap;
+  clearTimeout(timeout);
+
+	if (tapLength < 500 && tapLength > 0) { // double-tap detected
+  	// this is same function as click by mouse
+
+  	// When multi-touch happens in different heddles, that can be detected as double-tap. 
+  	// To address that, calculating if double tap happened within a very close region. 
+	  if (Math.abs(event.changedTouches[0].pageX - lastTouchEventX) < 50 && Math.abs(event.changedTouches[0].pageY - lastTouchEventY) < 50) {
+	  	if (elementType == "threading") {
+
+	  		// to make sure that only one is selected in a column of heddles
+				var heddles = element.siblings();
+				element.fill(cellColor);
+				for (var h=0; h<heddles.length; h++) {
+					if (heddles[h]!=element) {
+						heddles[h].fill("#fff");
+					}
+				}
+				// update the draft
+				draftSequence[element.warpNumber] = element.shaftNumber;
+				updateDraft();
+	  	}
+
+	  	// for both treadling and tieup
+	  	else if (elementType == "treadlingOrTieup"){
+	  		if (element.selected) {
+					element.selected = false;
+					element.fill("#fff");
+					draftSequence[element.weftNumber] = csvRemove(draftSequence[element.weftNumber], element.treadleNumber);
+				}
+				else {
+					element.selected = true;
+					element.fill(cellColor);
+					draftSequence[element.weftNumber] = csvAdd(draftSequence[element.weftNumber], element.treadleNumber);
+				}
+				updateDraft();
+	  	}
+	  }
+
+    event.preventDefault(); // to prevent the default zoom event on double-tap
+  } 
+  else { //single tap detected
+
+  	// this is same as mouseout function
+    element.stroke({color:'#000', width:10}); //gridline color and width when touchend -- similar to mouseout
+
+    timeout = setTimeout(function() {
+      clearTimeout(timeout);
+    }, 500);
+  }
+  
+  lastTap = currentTime;
+  lastTouchEventX = event.changedTouches[0].pageX;
+  lastTouchEventY = event.changedTouches[0].pageY;
 }
 
 // ------- Draft display and manipulation ----------
@@ -104,6 +156,7 @@ function loadSounds(instrumentName, soundArray) {
 // drawdownArray is a list of lists, each one containing an SVG group with a warp and a weft in it
 // the group can receive a warpUp or warpDown event, which shuffles the svg order of the rects
 
+var drawdownArray = [null];
 
 function computeNewDraft() {
 	// clearing previous sequences to compute and save new ones after user clicks
@@ -147,10 +200,6 @@ function computeThreading () {
 			// total no of heddles/rects in each column equals to number of shafts
 			var heddle = threading.rect(threadWidth, threadWidth).move(i*threadWidth, j*threadWidth); 
 
-			// For tap gestures, using hammer.js
-			// create a simple hammer instance for each heddle
-			// var mcHeddle = new Hammer(heddle);
-
 			// stroke is a SVG method that can fill an element with a color/image; can set width or opacity
 			heddle.stroke({color:'#000', width:10}); //gridline color and width in threading sequence
 
@@ -165,53 +214,10 @@ function computeThreading () {
 			if (heddle.shaftNumber == parseInt(draft.THREADING[heddle.warpNumber])) heddle.fill(warpColor);
 			else heddle.fill("#fff");
 
-			// heddle.click(function () {
-			// 	// to make sure that only one is selected in a column of heddles
-			// 	var heddles = this.siblings();
-			// 	this.fill(warpColor);
-			// 	for (var h=0; h<heddles.length; h++) {
-			// 		if (heddles[h]!=this) {
-			// 			heddles[h].fill("#fff");
-			// 		}
-			// 	}
-			// 	// update the draft
-			// 	draft.THREADING[this.warpNumber] = this.shaftNumber;
-			// 	updateDraft();
-			// });
-
-			heddle.mouseover(function () {
-				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
-				
-				// the topmost shaft is numbered 1, so subtract the shaft number from the total shafts 
-				// to play notes in the increasing order starting from bottom shafts
-				threadingSounds[draft.WEAVING.Shafts - this.shaftNumber].play();
-			});
-
-			heddle.touchstart(function () {
-				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
-				
-				// the topmost shaft is numbered 1, so subtract the shaft number from the total shafts 
-				// to play notes in the increasing order starting from bottom shafts
-				threadingSounds[draft.WEAVING.Shafts - this.shaftNumber].play();
-			});
-
-			heddle.mouseout(function () {
-				// this.attr('stroke', null);
-				this.stroke({color:'#000', width:10}); //gridline color and width when mouseout
-			});
-
-			// heddle.touchend(function () {
-			// 	// this.attr('stroke', null);
-			// 	this.stroke({color:'#000', width:10}); //gridline color and width when mouseout
-			// });
-
-			heddle.touchend(function(event) {
-		    var currentTime = new Date().getTime();
-		    var tapLength = currentTime - lastTap;
-		    clearTimeout(timeout);
-		    if (tapLength < 500 && tapLength > 0) { // double-tap detected
-		    	// this is same function as onclick
-	        // to make sure that only one is selected in a column of heddles
+			heddle.click(function (event) {
+			// only when clicked by a mouse -- to change the default tap behavior
+				if (event.pointerType == "mouse") {
+					// to make sure that only one is selected in a column of heddles
 					var heddles = this.siblings();
 					this.fill(warpColor);
 					for (var h=0; h<heddles.length; h++) {
@@ -222,18 +228,29 @@ function computeThreading () {
 					// update the draft
 					draft.THREADING[this.warpNumber] = this.shaftNumber;
 					updateDraft();
+				}
+			});
 
-	        event.preventDefault();
-		    } 
-		    else { //single tap detected
-	        timeout = setTimeout(function() {
-	        	// this is same as mouseout function
-            this.stroke({color:'#000', width:10}); //gridline color and width when mouseout
+			heddle.mouseover(function () {
+				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
+				
+				// the topmost shaft is numbered 1, so subtract the shaft number from the total shafts 
+				// to play notes in the increasing order starting from bottom shafts
+				threadingSounds[draft.WEAVING.Shafts - this.shaftNumber].play();
+			});
 
-            clearTimeout(timeout);
-	        }, 500);
-		    }
-		    lastTap = currentTime;
+			heddle.mouseout(function () {
+				this.stroke({color:'#000', width:10}); //gridline color and width when mouseout
+			});
+
+			// same work as mouseover event -- gridline color and width change to blue when touchstart
+			heddle.touchstart(function (event) {
+				this.stroke({color:'#06f', width:15}); 
+				threadingSounds[draft.WEAVING.Shafts - this.shaftNumber].play();
+			});
+
+			heddle.touchend(function(event){
+				tapHandler (this, "threading", draft.THREADING, warpColor, event);
 			});
 		}
 	}
@@ -271,19 +288,21 @@ function computeTreadlingTieup (gridType, jStopvalue, draftSequence, cellColor, 
 
 			// unselect a treadle if selected already, else select.
 			treadle.click(function () {
-				if (this.selected) {
-					this.selected = false;
-					this.fill("#fff");
-					draftSequence[this.weftNumber] = csvRemove(draftSequence[this.weftNumber], this.treadleNumber);
-				}
-				else {
-					this.selected = true;
-					this.fill(cellColor);
-					draftSequence[this.weftNumber] = csvAdd(draftSequence[this.weftNumber], this.treadleNumber);
-				}
+				// only when clicked by a mouse -- to change the default tap behavior
+				if (event.pointerType == "mouse") {
+					if (this.selected) {
+						this.selected = false;
+						this.fill("#fff");
+						draftSequence[this.weftNumber] = csvRemove(draftSequence[this.weftNumber], this.treadleNumber);
+					}
+					else {
+						this.selected = true;
+						this.fill(cellColor);
+						draftSequence[this.weftNumber] = csvAdd(draftSequence[this.weftNumber], this.treadleNumber);
+					}
 
-				updateDraft();
-
+					updateDraft();
+				}
 			});
 
 			treadle.mouseover(function () {
@@ -295,7 +314,19 @@ function computeTreadlingTieup (gridType, jStopvalue, draftSequence, cellColor, 
 
 			treadle.mouseout(function () {
 				this.stroke({color:'#000', width:10}); // gridline color and width when mouseout
-			})
+			});
+
+			// same work as mouseover event -- gridline color and width change to blue when touchstart
+			treadle.touchstart(function (event) {
+				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
+				// the leftmost treadle is numbered 1, so subtract 1 
+				// to play notes in the increasing order from left to right
+				soundArray[this.treadleNumber-1].play();
+			});
+
+			treadle.touchend(function(event){
+				tapHandler (this, "treadlingOrTieup", draftSequence, cellColor, event);
+			});
 		}
 	}
 }
@@ -330,6 +361,8 @@ function computeDrawdown () {
 	}
 }
 
+
+// other important functions called from computeDrawDown and computeTreadlingTieup
 
 function csvAdd (csv, thingToAdd) {
 	var list = (csv+"").split(",");
@@ -401,109 +434,3 @@ function renderWarpDrawdown (i, tieupMatrix) {
 	}
 }
 
-// ------- File saving / loading ----------
-// (mostly copied from earlier projects...)
-
-// function saveSvg(data, name) {
-// 	var svgBlob = new Blob([data], {type:"image/svg+xml;charset=utf-8"});
-// 	var svgUrl = URL.createObjectURL(svgBlob);
-// 	var downloadLink = document.createElement("a");
-// 	downloadLink.href = svgUrl;
-// 	downloadLink.download = name;
-// 	document.body.appendChild(downloadLink);
-// 	downloadLink.click();
-// 	document.body.removeChild(downloadLink);
-// }
-
-// function saveWif (data, name) {
-// 	console.log("downloading WIF");
-// 	var wif = encodeINI(data);
-// 	console.log(wif);
-// 	var wifBlob = new Blob([wif], {type:"text/plain;charset=utf-8"});
-// 	var wifUrl = URL.createObjectURL(wifBlob);
-// 	var downloadLink = document.createElement("a");
-// 	downloadLink.href = wifUrl;
-// 	downloadLink.download = name;
-// 	document.body.appendChild(downloadLink);
-// 	downloadLink.click();
-// 	// document.body.removeChild(downloadLink);
-// }
-
-// function loadWif (text) {
-// 	var data = decodeINI(text);
-// 	if (data.WIF) {
-// 		draft = data;
-// 		// console.log(JSON.stringify(data, null, 4));
-// 		// console.log(data);
-// 		if (parseInt(draft.WARP.Threads) > maxWarps) {
-// 			draft.WARP.Threads = maxWarps;
-// 		}
-// 		if (parseInt(draft.WEFT.Threads) > maxWefts) {
-// 			draft.WEFT.Threads = maxWefts;
-// 		}
-
-// 		threading.clear();
-// 		tieup.clear();
-// 		drawdown.clear();
-// 		treadling.clear();
-// 		computeNewDraft();
-// 	}
-// 	else {
-// 		console.log("not a WIF?");
-// 		console.log(text);		
-// 	}
-// }
-
-// function processFile (file) {
-// 	reader = new FileReader();
-// 	reader.readAsText(file);
-// 	reader.onload = function (e) {
-// 		var result = e.target.result;
-// 		loadWif(result);
-// 	};
-// }
-
-
-
-// // drop handling from https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
-// function dropHandler(ev) {
-// 	// Prevent default behavior (Prevent file from being opened)
-// 	ev.preventDefault();
-
-// 	if (ev.dataTransfer.items) {
-// 		// Use DataTransferItemList interface to access the file(s)
-// 		for (var i = 0; i < ev.dataTransfer.items.length; i++) {
-// 			// If dropped items aren't files, reject them
-// 			if (ev.dataTransfer.items[i].kind === 'file') {
-// 				var file = ev.dataTransfer.items[i].getAsFile();
-// 				console.log('... file[' + i + '].name = ' + file.name);
-// 				processFile(ev.dataTransfer.items[i].getAsFile());
-// 			}
-// 		}
-// 	} else {
-// 		// Use DataTransfer interface to access the file(s)
-// 		for (var i = 0; i < ev.dataTransfer.files.length; i++) {
-// 			console.log('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
-// 			processFile(ev.dataTransfer.files[i].getAsFile());
-// 		}
-// 	}
-// 	// Pass event to removeDragData for cleanup
-// 	removeDragData(ev)
-// }
-
-// function dragOverHandler(ev) {
-// 	// console.log('File(s) in drop zone'); 
-// 	// Prevent default behavior (Prevent file from being opened)
-// 	ev.preventDefault();
-// }
-
-// function removeDragData(ev) {
-// 	// console.log('Removing drag data')
-// 	if (ev.dataTransfer.items) {
-// 		// Use DataTransferItemList interface to remove the drag data
-// 		ev.dataTransfer.items.clear();
-// 	} else {
-// 		// Use DataTransfer interface to remove the drag data
-// 		ev.dataTransfer.clearData();
-// 	}
-// }

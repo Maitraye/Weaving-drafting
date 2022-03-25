@@ -3,7 +3,7 @@ draft = {
         "Version": "1.1",
         "Date": "April 20, 1997",
         "Developers": "wif@mhsoft.com",
-        "Source Program": "bvi-drafting"
+        "Source Program": "Simphony"
     },
     "CONTENTS": {
         "TEXT": "true",
@@ -34,10 +34,10 @@ draft = {
         "10": "2",
         "11": "3",
         "12": "4",
-        "13": "1",
-        "14": "2",
-        "15": "3",
-        "16": "4"
+        // "13": "1",
+        // "14": "2",
+        // "15": "3",
+        // "16": "4"
     },
     "TIEUP": {
         "1": "1,2",
@@ -62,10 +62,10 @@ draft = {
         "10": "2",
         "11": "3",
         "12": "4",
-        "13": "1",
-        "14": "2",
-        "15": "3",
-        "16": "4"
+        // "13": "1",
+        // "14": "2",
+        // "15": "3",
+        // "16": "4"
     },
     "WEAVING": {
         "Rising Shed": "true",
@@ -75,14 +75,14 @@ draft = {
     "WARP": {
         "Units": "centimeters",
         "Color": "Yellow",
-        "Threads": "16",
+        "Threads": "12",
         "Spacing": "0.212",
         "Thickness": "0.212"
     },
     "WEFT": {
         "Units": "centimeters",
         "Color": "Blue",
-        "Threads": "16",
+        "Threads": "12",
         "Spacing": "0.212",
         "Thickness": "0.212"
     },
