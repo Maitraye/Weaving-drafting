@@ -6,7 +6,7 @@ var threadingPlayButton = document.querySelector('#threading-play');
 var treadlingPlayButton = document.querySelector('#treadling-play');
 
 function createAudioSequence(instrumentName, type) {
-  var folderName = 'https://maitraye.github.io/weaving-sounds/';
+  var folderName = 'https://maitraye.github.io/Weaving-drafting/sounds/';
   // clearing previous sequence
   threadingSequence = [];
   treadlingSequence = [];
@@ -18,7 +18,6 @@ function createAudioSequence(instrumentName, type) {
       var audioFileName = folderName + instrumentName + selectedShaft + '.mp3';
       threadingSequence.push(audioFileName);
     }
-    console.log(threadingSequence);
   }
   else if (type == 'treadling') {
     var selectedTreadle;
@@ -33,44 +32,76 @@ function createAudioSequence(instrumentName, type) {
         }
       } 
     }
-    console.log(treadlingSequence);
   }
 }
 
 var context;
 var bufferLoader;
 
-function audioListPlay(audioURLs) {
+// function audioListPlay(audioURLs, panValue = 0) {
+function audioListPlay(audioURLs, gainValue = 1, panValue = 0, tieupMode = "") {
   // Fix up prefixing -- important to create a new context instance here; otherwise does not work
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
   context = new AudioContext();
 
-  // bufferLoader = new BufferLoader(
-  //   context,
-  //   [
-  //     'https://maitraye.github.io/weaving-sounds/Cello0.mp3',
-  //     'https://maitraye.github.io/weaving-sounds/Cello1.mp3',
-  //   ],
-  //   finishedLoading
-  //   );
+  function finishedLoading(bufferList) {
+    // Create multiple sources and play them in 0.5s distance.
 
-  bufferLoader = new BufferLoader(
-    context, audioURLs, finishedLoading
-  );
+    for (var i=0; i<bufferList.length; i++) {
+      var source = context.createBufferSource();
+      source.buffer = bufferList[i];
+      source.connect(context.destination);
+      source.start(i*0.5);
+    }
+  }
 
-  bufferLoader.load();
-}
+  function finishedLoadingGain(bufferList) {
+    for (var i=0; i<bufferList.length; i++) {
+      var source = context.createBufferSource();
+      source.buffer = bufferList[i];
+      var gainNode = context.createGain();
+      gainNode.gain.value = gainValue;
+      source.connect(gainNode).connect(context.destination);
+      source.start(i*0.5);
+    }
+  }
 
-function finishedLoading(bufferList) {
-  // Create multiple sources and play them in 0.5s distance.
+  function finishedLoadingPan(bufferList) {
+    for (var i=0; i<bufferList.length; i++) {
+      var source = context.createBufferSource();
+      source.buffer = bufferList[i];
+      var panNode = context.createStereoPanner();
+      panNode.pan.value = panValue;
+      source.connect(panNode).connect(context.destination);
+      source.start(i*0.5);
+    }
+  }
 
-  for (var i=0; i<bufferList.length; i++) {
-    var source = context.createBufferSource();
-    source.buffer = bufferList[i];
-    source.connect(context.destination);
-    source.start(i*0.5);
+  if (tieupMode == "") {
+    bufferLoader = new BufferLoader(context, audioURLs, finishedLoading);
+    bufferLoader.load();
+  }
+  else if (tieupMode == "Loudness") {
+    bufferLoader = new BufferLoader(context, audioURLs, finishedLoadingGain);
+    bufferLoader.load();
+  }
+  else if (tieupMode == "Panning") {
+    bufferLoader = new BufferLoader(context, audioURLs, finishedLoadingPan);
+    bufferLoader.load();
   }
 }
+
+// function finishedLoading(bufferList) {
+//   // Create multiple sources and play them in 0.5s distance.
+
+//   for (var i=0; i<bufferList.length; i++) {
+//     var source = context.createBufferSource();
+//     source.buffer = bufferList[i];
+//     source.connect(context.destination);
+//     source.start(i*0.5);
+//   }
+// }
+
 
 
 threadingPlayButton.addEventListener('click', function() {

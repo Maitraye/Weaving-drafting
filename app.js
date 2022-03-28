@@ -31,19 +31,40 @@ var tieupSounds = [];
 var warpInstrument = "Guitar";
 var weftInstrument = "Cello";
 
+var panValues = {
+	1 : -1, //treadle 1 in far left stereo (-1)
+	2 : -0.6,
+	3: -0.2,
+	4: 0.2,
+	5: 0.6,
+	6: 1 //treadle 6 in far right stereo (1)
+};
+
+var gainValues = {
+	1 : 0.5, //treadle 1 is 0.5 times default volume
+	2 : 1,
+	3: 1.5,
+	4: 2,
+	5: 2.5,
+	6: 3 //treadle 6 in 3 times default volume
+};
+
 function loadSounds(instrumentName, soundArray) {
-	// var folderName = './sounds/';
 	// to align with CORR policy, cannot load local files. Needs to use an url.
-	var folderName = 'https://maitraye.github.io/weaving-sounds/';
-	for (var i=0; i<8; i++) {
-		audioName = folderName + instrumentName + i + '.mp3';
-		// const blobUrl = window.createObjectURL(audioName);
-		// var sound = new Howl({
-  // 			src: [audioName],
-  // 			html5: true 
-		// });
-		// soundArray.push(sound);
-		soundArray.push(audioName);
+	var folderName = 'https://maitraye.github.io/Weaving-drafting/sounds/';
+	if (instrumentName == 'Organ') { //for tieup, load full organ audio list
+		for (var j=0; j<6; j++) {
+			for (var i=0; i<7; i++) {
+				audioName = folderName + instrumentName + j + '-'+ i + '.mp3';
+				soundArray.push(audioName);	
+			}
+		}
+	}
+	else {
+		for (var i=0; i<8; i++) {
+			audioName = folderName + instrumentName + i + '.mp3';
+			soundArray.push(audioName);
+		}
 	}
 }
 
@@ -59,7 +80,7 @@ SVG.on(document, 'DOMContentLoaded', function() {
 
 	loadSounds(warpInstrument, threadingSounds);
 	loadSounds(weftInstrument, treadlingSounds);
-	loadSounds("Piano", tieupSounds);
+	loadSounds('Organ', tieupSounds);
 
 	warpColor = RGBToHex(draft['COLOR TABLE'][draft.WARP.Color]);
 	weftColor = RGBToHex(draft['COLOR TABLE'][draft.WEFT.Color]);
@@ -189,11 +210,11 @@ function computeNewDraft() {
 
 	// for tieup 
 	tieup.size(draft.WEAVING.Treadles * threadWidth, draft.WEAVING.Shafts * threadWidth);
-	computeTreadlingTieup(tieup, draft.WEAVING.Shafts, draft.TIEUP, tieupColor, tieupSounds);
+	computeTreadlingTieup(tieup, "tieup", draft.WEAVING.Shafts, draft.TIEUP, tieupColor, tieupSounds);
 
 	// for treadling sequence
 	treadling.size(draft.WEAVING.Treadles * threadWidth, draft.WEFT.Threads * threadWidth);
-	computeTreadlingTieup(treadling, draft.WEFT.Threads, draft.TREADLING, weftColor, treadlingSounds);
+	computeTreadlingTieup(treadling, "treadling", draft.WEFT.Threads, draft.TREADLING, weftColor, treadlingSounds);
 
 	// for drawdown
 	drawdown.size(draft.WARP.Threads * threadWidth, draft.WEFT.Threads * threadWidth);
@@ -232,7 +253,7 @@ function computeThreading () {
 			heddle.click(function (event) {
 			// only when Edit mode is on
 			// only when clicked by a mouse -- so that this function is not executed by default when single tap happens
-			console.log (mode);
+
 				if (mode == "Edit" && event.pointerType == "mouse") {
 					// to make sure that only one is selected in a column of heddles
 					var heddles = this.siblings();
@@ -284,17 +305,17 @@ function computeThreading () {
 	}
 }
 
-function computeTreadlingTieup (gridType, jStopvalue, draftSequence, cellColor, soundArray) {
-	// gridType = treadling or tieup
+function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellColor, soundArray) {
+	// grid = treadling or tieup
 	// jStopvalue = draft.WEFT.Threads (for treadling) or draft.WEAVING.Shafts (for tieup)
 	
 	for (var j=0; j<jStopvalue; j++) {
-		var currentRow = gridType.group();
+		var currentRow = grid.group();
 		
 		for (var i=0; i<draft.WEAVING.Treadles; i++) {
 			// creating row of treadles for each weft thread; 
 			// total no. of rects in each row equals to number of total treadles
-			var treadle = gridType.rect(threadWidth, threadWidth).move(i*threadWidth, j*threadWidth);
+			var treadle = grid.rect(threadWidth, threadWidth).move(i*threadWidth, j*threadWidth);
 			treadle.stroke({color:'#000', width:10}); //gridline color and width in tieup and treadling
 			treadle.addTo(currentRow);
 			treadle.weftNumber = j+1;
@@ -342,9 +363,20 @@ function computeTreadlingTieup (gridType, jStopvalue, draftSequence, cellColor, 
 					// the leftmost treadle is numbered 1, so subtract 1 
 					// to play notes in the increasing order from left to right
 					// soundArray[this.treadleNumber-1].play();
-					audioListPlay([soundArray[this.treadleNumber-1]]);
+					if (gridType == "treadling") {
+						audioListPlay([soundArray[this.treadleNumber-1]]);
+					}
+					// for tieup play notes in the increasing order from bottom to top
+					// and pan from left to right stereo for treadles in left to right
+					else if (gridType == "tieup") { 
+						audioListPlay([soundArray[this.weftNumber+13]]);
+
+						// tieupSounds [14-20] is C4-B4 (regular octave)
+						// audioListPlay([soundArray[this.weftNumber+13]], gainValues[this.treadleNumber], 0, "Loudness");
+						// audioListPlay([soundArray[this.weftNumber+13]], 0, panValues[this.treadleNumber], "Panning");
+						// audioListPlay([soundArray[this.weftNumber+13]]);
+					}
 				}
-				
 			});
 
 			treadle.mouseout(function () {
@@ -353,12 +385,17 @@ function computeTreadlingTieup (gridType, jStopvalue, draftSequence, cellColor, 
 
 			// same work as mouseover event -- gridline color and width change to blue when touchstart
 			treadle.touchstart(function (event) {
-				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
+				this.stroke({color:'#06f', width:15}); 
 
-				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.selected || mode == "Edit") {
-					// soundArray[this.treadleNumber-1].play();
-					audioListPlay([soundArray[this.treadleNumber-1]]);
+					if (gridType == "treadling") {
+						audioListPlay([soundArray[this.treadleNumber-1]]);
+					}
+					else if (gridType == "tieup") { 
+						// audioListPlay([soundArray[this.weftNumber-1]], gainValues[this.treadleNumber], 0, "Loudness");
+						// audioListPlay([soundArray[this.weftNumber-1]], 0, panValues[this.treadleNumber], "Panning");
+						// audioListPlay([soundArray[this.weftNumber-1]]);
+					}
 				}
 			});
 
