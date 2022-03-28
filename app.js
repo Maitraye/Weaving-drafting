@@ -366,15 +366,14 @@ function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellC
 					if (gridType == "treadling") {
 						audioListPlay([soundArray[this.treadleNumber-1]]);
 					}
-					// for tieup play notes in the increasing order from bottom to top
-					// and pan from left to right stereo for treadles in left to right
+					// for tieup play notes in the increasing order from bottom to top, so 6-weftNumber
+					// tieupSounds [14-20] is C4-B4 (regular octave) for Organ sounds
 					else if (gridType == "tieup") { 
-						audioListPlay([soundArray[this.weftNumber+13]]);
+						audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
 
-						// tieupSounds [14-20] is C4-B4 (regular octave)
-						// audioListPlay([soundArray[this.weftNumber+13]], gainValues[this.treadleNumber], 0, "Loudness");
-						// audioListPlay([soundArray[this.weftNumber+13]], 0, panValues[this.treadleNumber], "Panning");
-						// audioListPlay([soundArray[this.weftNumber+13]]);
+						// audioListPlay([soundArray[6-this.weftNumber+14]], gainValues[this.treadleNumber], 0, "Loudness");
+						// audioListPlay([soundArray[6-this.weftNumber+14]], 0, panValues[this.treadleNumber], "Panning");
+						// audioListPlay([soundArray[6-this.weftNumber+14]]);
 					}
 				}
 			});
@@ -392,9 +391,11 @@ function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellC
 						audioListPlay([soundArray[this.treadleNumber-1]]);
 					}
 					else if (gridType == "tieup") { 
-						// audioListPlay([soundArray[this.weftNumber-1]], gainValues[this.treadleNumber], 0, "Loudness");
-						// audioListPlay([soundArray[this.weftNumber-1]], 0, panValues[this.treadleNumber], "Panning");
-						// audioListPlay([soundArray[this.weftNumber-1]]);
+						audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
+
+						// audioListPlay([soundArray[6-this.weftNumber+14]], gainValues[this.treadleNumber], 0, "Loudness");
+						// audioListPlay([soundArray[6-this.weftNumber+14]], 0, panValues[this.treadleNumber], "Panning");
+						// audioListPlay([soundArray[6-this.weftNumber+14]]);
 					}
 				}
 			});
