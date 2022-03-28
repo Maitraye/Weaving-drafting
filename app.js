@@ -1,6 +1,8 @@
 var threadWidth = 62; // cell width; for instructor view max value was 48 for 6 shafts and col-md-8
 var threadSpacing = 10; // drawdown gridlines
 
+var mode = "Read";
+
 var warpColor;
 var weftColor;
 var tieupColor = "#555";
@@ -26,17 +28,22 @@ function RGBToHex(rgb) {
 var threadingSounds = [];
 var treadlingSounds = [];
 var tieupSounds = [];
+var warpInstrument = "Guitar";
+var weftInstrument = "Cello";
 
 function loadSounds(instrumentName, soundArray) {
-	var folderName = './sounds/';
+	// var folderName = './sounds/';
+	// to align with CORR policy, cannot load local files. Needs to use an url.
+	var folderName = 'https://maitraye.github.io/weaving-sounds/';
 	for (var i=0; i<8; i++) {
 		audioName = folderName + instrumentName + i + '.mp3';
 		// const blobUrl = window.createObjectURL(audioName);
-		var sound = new Howl({
-  			src: [audioName],
-  			html5: true 
-		});
-		soundArray.push(sound);
+		// var sound = new Howl({
+  // 			src: [audioName],
+  // 			html5: true 
+		// });
+		// soundArray.push(sound);
+		soundArray.push(audioName);
 	}
 }
 
@@ -50,9 +57,9 @@ SVG.on(document, 'DOMContentLoaded', function() {
 	drawdown = SVG('drawdown');		// get an element from DOM, id = 'drawdown' in index.html
 	treadling = SVG('treadling');	// get an element from DOM, id = 'treadling' in index.html
 
-	loadSounds("Piano", threadingSounds);
-	loadSounds("Cello", treadlingSounds);
-	// loadSounds("Guitar", tieupSounds);
+	loadSounds(warpInstrument, threadingSounds);
+	loadSounds(weftInstrument, treadlingSounds);
+	loadSounds("Piano", tieupSounds);
 
 	warpColor = RGBToHex(draft['COLOR TABLE'][draft.WARP.Color]);
 	weftColor = RGBToHex(draft['COLOR TABLE'][draft.WEFT.Color]);
@@ -61,11 +68,11 @@ SVG.on(document, 'DOMContentLoaded', function() {
 
 // updating warp and weft color based on user input in drawdown button
 $('#warpColor').change(function () {
-    var selectedWarpColor = $(this).find("option:selected").text();
-    draft.WARP.Color = selectedWarpColor;
-    warpColor = RGBToHex(draft['COLOR TABLE'][draft.WARP.Color]);
-    computeNewDraft();
-	});
+  var selectedWarpColor = $(this).find("option:selected").text();
+  draft.WARP.Color = selectedWarpColor;
+  warpColor = RGBToHex(draft['COLOR TABLE'][draft.WARP.Color]);
+  computeNewDraft();
+});
 
 $('#weftColor').change(function () {
   var selectedWeftColor = $(this).find("option:selected").text();
@@ -75,15 +82,21 @@ $('#weftColor').change(function () {
 });
 
 $('#warpInstrument').change(function () {
-    var selectedWarpInstrument = $(this).find("option:selected").text();
-    threadingSounds.length = 0;
-    loadSounds(selectedWarpInstrument, threadingSounds);
-	});
+  warpInstrument = $(this).find("option:selected").text();
+  threadingSounds.length = 0;
+  loadSounds(warpInstrument, threadingSounds);
+});
 
 $('#weftInstrument').change(function () {
-  var selectedWeftInstrument = $(this).find("option:selected").text();
+  weftInstrument = $(this).find("option:selected").text();
   treadlingSounds.length = 0;
-  loadSounds(selectedWeftInstrument, treadlingSounds);
+  loadSounds(weftInstrument, treadlingSounds);
+});
+
+// updating reading or editing mode
+$('#mode').change(function () {
+  var selectedMode = $(this).find("option:selected").text();
+  mode = selectedMode;
 });
 
 // to implement double tap
@@ -100,39 +113,41 @@ function tapHandler(element, elementType, draftSequence, cellColor, event) {
 	if (tapLength < 500 && tapLength > 0) { // double-tap detected
   	// this is same function as click by mouse
 
-  	// When multi-touch happens in different heddles, that can be detected as double-tap. 
-  	// To address that, calculating if double tap happened within a very close region. 
-	  if (Math.abs(event.changedTouches[0].pageX - lastTouchEventX) < 50 && Math.abs(event.changedTouches[0].pageY - lastTouchEventY) < 50) {
-	  	if (elementType == "threading") {
+  	if (mode == "Edit") {
+	  	// When multi-touch happens in different heddles, that can be detected as double-tap. 
+	  	// To address that, calculating if double tap happened within a very close region. 
+		  if (Math.abs(event.changedTouches[0].pageX - lastTouchEventX) < 50 && Math.abs(event.changedTouches[0].pageY - lastTouchEventY) < 50) {
+		  	if (elementType == "threading") {
 
-	  		// to make sure that only one is selected in a column of heddles
-				var heddles = element.siblings();
-				element.fill(cellColor);
-				for (var h=0; h<heddles.length; h++) {
-					if (heddles[h]!=element) {
-						heddles[h].fill("#fff");
-					}
-				}
-				// update the draft
-				draftSequence[element.warpNumber] = element.shaftNumber;
-				updateDraft();
-	  	}
-
-	  	// for both treadling and tieup
-	  	else if (elementType == "treadlingOrTieup"){
-	  		if (element.selected) {
-					element.selected = false;
-					element.fill("#fff");
-					draftSequence[element.weftNumber] = csvRemove(draftSequence[element.weftNumber], element.treadleNumber);
-				}
-				else {
-					element.selected = true;
+		  		// to make sure that only one is selected in a column of heddles
+					var heddles = element.siblings();
 					element.fill(cellColor);
-					draftSequence[element.weftNumber] = csvAdd(draftSequence[element.weftNumber], element.treadleNumber);
-				}
-				updateDraft();
-	  	}
-	  }
+					for (var h=0; h<heddles.length; h++) {
+						if (heddles[h]!=element) {
+							heddles[h].fill("#fff");
+						}
+					}
+					// update the draft
+					draftSequence[element.warpNumber] = element.shaftNumber;
+					updateDraft();
+		  	}
+
+		  	// for both treadling and tieup
+		  	else if (elementType == "treadlingOrTieup"){
+		  		if (element.selected) {
+						element.selected = false;
+						element.fill("#fff");
+						draftSequence[element.weftNumber] = csvRemove(draftSequence[element.weftNumber], element.treadleNumber);
+					}
+					else {
+						element.selected = true;
+						element.fill(cellColor);
+						draftSequence[element.weftNumber] = csvAdd(draftSequence[element.weftNumber], element.treadleNumber);
+					}
+					updateDraft();
+		  	}
+		  }
+		}
 
     event.preventDefault(); // to prevent the default zoom event on double-tap
   } 
@@ -215,8 +230,10 @@ function computeThreading () {
 			else heddle.fill("#fff");
 
 			heddle.click(function (event) {
-			// only when clicked by a mouse -- to change the default tap behavior
-				if (event.pointerType == "mouse") {
+			// only when Edit mode is on
+			// only when clicked by a mouse -- so that this function is not executed by default when single tap happens
+			console.log (mode);
+				if (mode == "Edit" && event.pointerType == "mouse") {
 					// to make sure that only one is selected in a column of heddles
 					var heddles = this.siblings();
 					this.fill(warpColor);
@@ -234,9 +251,16 @@ function computeThreading () {
 			heddle.mouseover(function () {
 				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
 				
-				// the topmost shaft is numbered 1, so subtract the shaft number from the total shafts 
-				// to play notes in the increasing order starting from bottom shafts
-				threadingSounds[draft.WEAVING.Shafts - this.shaftNumber].play();
+				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
+				if (this.shaftNumber == parseInt(draft.THREADING[this.warpNumber]) || mode == "Edit") {
+
+					// the topmost shaft is numbered 1, so subtract the shaft number from the total shafts 
+					// to play notes in the increasing order starting from bottom shafts
+					// threadingSounds[draft.WEAVING.Shafts - this.shaftNumber].play();
+					// audioListPlay is defined in play-web-audio-api.js; takes a list of audio filenames as input
+					audioListPlay([threadingSounds[draft.WEAVING.Shafts - this.shaftNumber]]);
+				}
+				
 			});
 
 			heddle.mouseout(function () {
@@ -246,7 +270,11 @@ function computeThreading () {
 			// same work as mouseover event -- gridline color and width change to blue when touchstart
 			heddle.touchstart(function (event) {
 				this.stroke({color:'#06f', width:15}); 
-				threadingSounds[draft.WEAVING.Shafts - this.shaftNumber].play();
+				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
+				if (this.shaftNumber == parseInt(draft.THREADING[this.warpNumber]) || mode == "Edit") {
+					// threadingSounds[draft.WEAVING.Shafts - this.shaftNumber].play();
+					audioListPlay([threadingSounds[draft.WEAVING.Shafts - this.shaftNumber]]);
+				}
 			});
 
 			heddle.touchend(function(event){
@@ -288,8 +316,9 @@ function computeTreadlingTieup (gridType, jStopvalue, draftSequence, cellColor, 
 
 			// unselect a treadle if selected already, else select.
 			treadle.click(function () {
+				// only when Edit mode is on
 				// only when clicked by a mouse -- to change the default tap behavior
-				if (event.pointerType == "mouse") {
+				if (mode == "Edit" && event.pointerType == "mouse") {
 					if (this.selected) {
 						this.selected = false;
 						this.fill("#fff");
@@ -307,9 +336,15 @@ function computeTreadlingTieup (gridType, jStopvalue, draftSequence, cellColor, 
 
 			treadle.mouseover(function () {
 				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
-				// the leftmost treadle is numbered 1, so subtract 1 
-				// to play notes in the increasing order from left to right
-				soundArray[this.treadleNumber-1].play();
+
+				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
+				if (this.selected || mode == "Edit") {
+					// the leftmost treadle is numbered 1, so subtract 1 
+					// to play notes in the increasing order from left to right
+					// soundArray[this.treadleNumber-1].play();
+					audioListPlay([soundArray[this.treadleNumber-1]]);
+				}
+				
 			});
 
 			treadle.mouseout(function () {
@@ -319,9 +354,12 @@ function computeTreadlingTieup (gridType, jStopvalue, draftSequence, cellColor, 
 			// same work as mouseover event -- gridline color and width change to blue when touchstart
 			treadle.touchstart(function (event) {
 				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
-				// the leftmost treadle is numbered 1, so subtract 1 
-				// to play notes in the increasing order from left to right
-				soundArray[this.treadleNumber-1].play();
+
+				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
+				if (this.selected || mode == "Edit") {
+					// soundArray[this.treadleNumber-1].play();
+					audioListPlay([soundArray[this.treadleNumber-1]]);
+				}
 			});
 
 			treadle.touchend(function(event){

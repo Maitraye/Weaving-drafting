@@ -61,11 +61,12 @@ function autoplay(i, list, finalCycle, currentCycle) {
 
 // play audio
 threadingPlayButton.addEventListener('click', function() {
-	createAudioSequence('Piano', 'threading');
+	createAudioSequence(warpInstrument, 'threading');
+
 	autoplay(0, threadingSequence,1);
 }, false);
 
 treadlingPlayButton.addEventListener('click', function() {
-	createAudioSequence('Cello', 'treadling');
+	createAudioSequence(weftInstrument, 'treadling');
 	autoplay(0, treadlingSequence,1);
 }, false);
