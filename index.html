@@ -13,7 +13,7 @@
 
 	<script language="javascript" type="text/javascript" src="default-pattern.js"></script>
 
-	<title>Weaving draft demo</title>
+	<title>Simphony</title>
 	<style> 
 		body {
 			text-align: center;
@@ -26,12 +26,15 @@
 			display: inline-block;
 			margin: 5px; /*for the gap between threadling, treadling, tieup, and drawdown */
 		}
+		.settingsText {
+			font-weight: bold;
+		}
 	  }
 	</style>
 </head>
 
 <body>
-	<h1>Weaving draft</h1>
+	<h1>Simphony</h1>
 	<div class="container">
 		<div class="row g-0">
 			<div class="col-md-11" style="width: 89.1666666667%">
@@ -58,7 +61,17 @@
 
 			<!-- data-* attribute adds custom information to a button element for sending a value to js -->
 			<div class="col-md-1" style="width: 10.8333333333%">
-				Warp
+				
+				<div class="form-floating">
+					<select class="form-select" id="mode" aria-label = "Mode">
+					    <option selected>Read</option>
+					    <option>Edit</option>
+					</select>
+					<label for="mode">Mode</label>
+				</div>
+				<hr>
+
+				<span class="settingsText"> Warp </span>
 
 				<div class="form-floating">
 					<select class="form-select" id="warpColor" aria-label = "Warp color">
@@ -75,7 +88,7 @@
 
 				<div class="form-floating">
 					<select class="form-select" id="warpInstrument" aria-label = "Warp Instrument">
-					    <option>Piano</option>
+					    <option>Organ</option>
 					    <option selected>Guitar</option>
 					    <option>Cello</option>
 					    <option>Harp</option>
@@ -86,13 +99,13 @@
 					<label for="warpInstrument">Instrument</label>
 				</div>
 
-				<button class="btn btn-primary" data-playing="false" id="threading-play" role="switch" aria-checked="false">
+				<button class="btn btn-primary btn-sm" data-playing="false" id="threading-play" role="switch" aria-checked="false">
 					<span>Play</span>
 				</button>
 
 				<hr>
 
-				Weft
+				<span class="settingsText"> Weft </span>
 
 				<div class="form-floating">
 					<select class="form-select" id="weftColor" aria-label = "Weft color">
@@ -109,7 +122,7 @@
 
 				<div class="form-floating">
 					<select class="form-select" id="weftInstrument" aria-label = "Weft Instrument">
-					    <option>Piano</option>
+					    <option>Organ</option>
 					    <option>Guitar</option>
 					    <option selected>Cello</option>
 					    <option>Harp</option>
@@ -120,20 +133,47 @@
 					<label for="weftInstrument">Instrument</label>
 				</div>
 
-				<button class="btn btn-primary" data-playing="false" id="treadling-play" role="switch" aria-checked="false">
+				<button class="btn btn-primary btn-sm" data-playing="false" id="treadling-play" role="switch" aria-checked="false">
 					<span>Play</span>
 				</button>
 
 				<hr>
 
+				<span class="settingsText"> Tie-up </span>
+
 				<div class="form-floating">
-					<select class="form-select" id="mode" aria-label = "Mode">
-					    <option selected>Read</option>
-					    <option>Edit</option>
+					<select class="form-select" id="tieupOptions" aria-label = "Representation of tieup">
+						<option selected>Loudness</option>
+					    <option>Panning</option>
+					    <option>On-off tones</option>
 					</select>
-					<label for="mode">Mode</label>
+					<label for="tieupOptions">Options</label>
 				</div>
-			
+
+				<div class="form-floating">
+					<select class="form-select" id="readBy" aria-label = "Read by column or row">
+					    <option selected>Column</option>
+					    <option>Row</option>
+					</select>
+					<label for="readBy">Read by</label>
+				</div>
+
+				<button class="btn btn-primary btn-sm" data-playing="false" id="tieup-play" role="switch" aria-checked="false">
+					<span>Play</span>
+				</button>
+
+				<hr>
+
+				<span class="settingsText"> Draw-down </span>
+
+				<div class="form-floating">
+					<select class="form-select" id="drawdownView" aria-label = "Drawdown view">
+					    <option selected>Warp</option>
+					    <option>Weft</option>
+					    <option>Both</option>
+					</select>
+					<label for="drawdownView">Presentation</label>
+				</div>
 			</div>
 		</div>
   	</div>

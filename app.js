@@ -120,6 +120,32 @@ $('#mode').change(function () {
   mode = selectedMode;
 });
 
+var ttsFilenames = {
+	'warp' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/warp.mp3',
+	'weft' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/weft.mp3',
+	'shaft' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/shaft.mp3',
+	'treadle' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/treadle.mp3',
+	'pedal' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/pedal.mp3',
+	'on' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/on.mp3',
+	'off' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/off.mp3',
+	'tiedup' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/tiedup.mp3',
+	'notTiedup' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/notTiedup.mp3',
+	1 :  'https://maitraye.github.io/Weaving-drafting/sounds/tts/one.mp3',
+	2 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/two.mp3',
+	3 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/three.mp3',
+	4 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/four.mp3',
+	5 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/five.mp3',
+	6 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/six.mp3',
+	7 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/seven.mp3',
+	8 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/eight.mp3',
+	9 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/nine.mp3',
+	10 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/ten.mp3',
+	11 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/eleven.mp3',
+	12 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/twelve.mp3',
+}
+
+
+
 // to implement double tap
 var timeout;
 var lastTap = 0;
@@ -143,6 +169,10 @@ function tapHandler(element, elementType, draftSequence, cellColor, event) {
 		  		// to make sure that only one is selected in a column of heddles
 					var heddles = element.siblings();
 					element.fill(cellColor);
+
+					audioListPlay([ttsFilenames.shaft, ttsFilenames[element.shaftNumber], 
+						ttsFilenames.warp, ttsFilenames[element.warpNumber], ttsFilenames.on]);
+
 					for (var h=0; h<heddles.length; h++) {
 						if (heddles[h]!=element) {
 							heddles[h].fill("#fff");
@@ -258,6 +288,8 @@ function computeThreading () {
 					// to make sure that only one is selected in a column of heddles
 					var heddles = this.siblings();
 					this.fill(warpColor);
+					audioListPlay([ttsFilenames.shaft, ttsFilenames[this.shaftNumber], 
+						ttsFilenames.warp, ttsFilenames[this.warpNumber], ttsFilenames.on]);
 					for (var h=0; h<heddles.length; h++) {
 						if (heddles[h]!=this) {
 							heddles[h].fill("#fff");

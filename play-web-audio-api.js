@@ -1,6 +1,7 @@
 // define variables
 var threadingSequence = [];
 var treadlingSequence = [];
+var tieupSequence = [];
 
 var threadingPlayButton = document.querySelector('#threading-play');
 var treadlingPlayButton = document.querySelector('#treadling-play');
@@ -90,19 +91,6 @@ function audioListPlay(audioURLs, gainValue = 1, panValue = 0, tieupMode = "") {
     bufferLoader.load();
   }
 }
-
-// function finishedLoading(bufferList) {
-//   // Create multiple sources and play them in 0.5s distance.
-
-//   for (var i=0; i<bufferList.length; i++) {
-//     var source = context.createBufferSource();
-//     source.buffer = bufferList[i];
-//     source.connect(context.destination);
-//     source.start(i*0.5);
-//   }
-// }
-
-
 
 threadingPlayButton.addEventListener('click', function() {
   createAudioSequence(warpInstrument, 'threading');
