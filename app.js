@@ -2,6 +2,7 @@ var threadWidth = 62; // cell width; for instructor view max value was 48 for 6 
 var threadSpacing = 10; // drawdown gridlines
 
 var mode = "Read";
+var verbosity = "High";
 
 var warpColor;
 var weftColor;
@@ -120,6 +121,11 @@ $('#mode').change(function () {
   mode = selectedMode;
 });
 
+$('#verbosity').change(function () {
+  var selectedVerbosity = $(this).find("option:selected").text();
+  verbosity = selectedVerbosity;
+});
+
 var ttsFilenames = {
 	'warp' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/warp.mp3',
 	'weft' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/weft.mp3',
@@ -152,7 +158,7 @@ var lastTap = 0;
 var lastTouchEventX = 0;
 var lastTouchEventY = 0;
 
-function tapHandler(element, elementType, draftSequence, cellColor, event) {
+function tapHandler(element, gridType, draftSequence, cellColor, event) {
   var currentTime = new Date().getTime();
   var tapLength = currentTime - lastTap;
   clearTimeout(timeout);
@@ -164,14 +170,22 @@ function tapHandler(element, elementType, draftSequence, cellColor, event) {
 	  	// When multi-touch happens in different heddles, that can be detected as double-tap. 
 	  	// To address that, calculating if double tap happened within a very close region. 
 		  if (Math.abs(event.changedTouches[0].pageX - lastTouchEventX) < 50 && Math.abs(event.changedTouches[0].pageY - lastTouchEventY) < 50) {
-		  	if (elementType == "threading") {
+		  	if (gridType == "threading") {
 
 		  		// to make sure that only one is selected in a column of heddles
 					var heddles = element.siblings();
 					element.fill(cellColor);
 
-					audioListPlay([ttsFilenames.shaft, ttsFilenames[element.shaftNumber], 
-						ttsFilenames.warp, ttsFilenames[element.warpNumber], ttsFilenames.on]);
+					if (verbosity == "High") {
+						// making sure that the bottom right shaft is 1 and top right shaft is 6
+					  // making sure that the rightmost warp is 1 and leftmost is 12
+						audioListPlay([ttsFilenames.shaft, ttsFilenames[7-element.shaftNumber], 
+							ttsFilenames.warp, ttsFilenames[13-element.warpNumber], ttsFilenames.on]);
+					}
+					else {
+						audioListPlay([ttsFilenames.on]);
+					}
+					
 
 					for (var h=0; h<heddles.length; h++) {
 						if (heddles[h]!=element) {
@@ -184,16 +198,45 @@ function tapHandler(element, elementType, draftSequence, cellColor, event) {
 		  	}
 
 		  	// for both treadling and tieup
-		  	else if (elementType == "treadlingOrTieup"){
+		  	else {
 		  		if (element.selected) {
 						element.selected = false;
 						element.fill("#fff");
 						draftSequence[element.weftNumber] = csvRemove(draftSequence[element.weftNumber], element.treadleNumber);
+						
+						if (verbosity == "Low") {
+							audioListPlay([ttsFilenames.off]);
+						}
+						else {
+							if (gridType == "treadling") {
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+								ttsFilenames.weft, ttsFilenames[element.weftNumber], ttsFilenames.off]);
+							}
+							else if (gridType == "tieup") {
+								// making sure that the bottom row is shaft 1 and top row is shaft 6
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+									ttsFilenames.shaft, ttsFilenames[7-this.weftNumber], ttsFilenames.notTiedup]);
+							}
+						}
 					}
 					else {
 						element.selected = true;
 						element.fill(cellColor);
 						draftSequence[element.weftNumber] = csvAdd(draftSequence[element.weftNumber], element.treadleNumber);
+						if (verbosity == "Low") {
+							audioListPlay([ttsFilenames.on]);
+						}
+						else {
+							if (gridType == "treadling") {
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+									ttsFilenames.weft, ttsFilenames[element.weftNumber], ttsFilenames.on]);
+							}
+							else if (gridType == "tieup") {
+								// making sure that the bottom row is shaft 1 and top row is shaft 6
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+									ttsFilenames.shaft, ttsFilenames[7-this.weftNumber], ttsFilenames.tiedup]);
+							}
+						}
 					}
 					updateDraft();
 		  	}
@@ -288,8 +331,17 @@ function computeThreading () {
 					// to make sure that only one is selected in a column of heddles
 					var heddles = this.siblings();
 					this.fill(warpColor);
-					audioListPlay([ttsFilenames.shaft, ttsFilenames[this.shaftNumber], 
-						ttsFilenames.warp, ttsFilenames[this.warpNumber], ttsFilenames.on]);
+
+					if (verbosity == "High") {
+						// making sure that the bottom right shaft is 1 and top right shaft is 6
+					  // making sure that the rightmost warp is 1 and leftmost is 12
+						audioListPlay([ttsFilenames.shaft, ttsFilenames[7-this.shaftNumber], 
+							ttsFilenames.warp, ttsFilenames[13-this.warpNumber], ttsFilenames.on]);
+					}
+					else {
+						audioListPlay([ttsFilenames.on]);
+					}
+
 					for (var h=0; h<heddles.length; h++) {
 						if (heddles[h]!=this) {
 							heddles[h].fill("#fff");
@@ -376,11 +428,41 @@ function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellC
 						this.selected = false;
 						this.fill("#fff");
 						draftSequence[this.weftNumber] = csvRemove(draftSequence[this.weftNumber], this.treadleNumber);
+
+						if (verbosity == "Low") {
+							audioListPlay([ttsFilenames.off]);
+						}
+						else {
+							if (gridType == "treadling") {
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+									ttsFilenames.weft, ttsFilenames[this.weftNumber], ttsFilenames.off]);
+							}
+							else if (gridType == "tieup") {
+								// making sure that the bottom row is shaft 1 and top row is shaft 6
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+									ttsFilenames.shaft, ttsFilenames[7-this.weftNumber], ttsFilenames.notTiedup]);
+							}
+						}	
 					}
 					else {
 						this.selected = true;
 						this.fill(cellColor);
 						draftSequence[this.weftNumber] = csvAdd(draftSequence[this.weftNumber], this.treadleNumber);
+						
+						if (verbosity == "Low") {
+							audioListPlay([ttsFilenames.on]);
+						}
+						else {
+							if (gridType == "treadling") {
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+									ttsFilenames.weft, ttsFilenames[this.weftNumber], ttsFilenames.on]);
+							}
+							else if (gridType == "tieup") {
+								// making sure that the bottom row is shaft 1 and top row is shaft 6
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+									ttsFilenames.shaft, ttsFilenames[7-this.weftNumber], ttsFilenames.tiedup]);
+							}
+						}
 					}
 
 					updateDraft();
@@ -394,7 +476,6 @@ function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellC
 				if (this.selected || mode == "Edit") {
 					// the leftmost treadle is numbered 1, so subtract 1 
 					// to play notes in the increasing order from left to right
-					// soundArray[this.treadleNumber-1].play();
 					if (gridType == "treadling") {
 						audioListPlay([soundArray[this.treadleNumber-1]]);
 					}
@@ -434,7 +515,7 @@ function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellC
 			});
 
 			treadle.touchend(function(event){
-				tapHandler (this, "treadlingOrTieup", draftSequence, cellColor, event);
+				tapHandler (this, gridType, draftSequence, cellColor, event);
 			});
 		}
 	}
