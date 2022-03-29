@@ -32,8 +32,8 @@ var warpInstrument = "Guitar";
 var weftInstrument = "Cello";
 
 var panValues = {
-	1 : -1, //treadle 1 in far left stereo (-1)
-	2 : -0.6,
+	1: -1, //treadle 1 in far left stereo (-1)
+	2: -0.6,
 	3: -0.2,
 	4: 0.2,
 	5: 0.6,
@@ -41,31 +41,31 @@ var panValues = {
 };
 
 var gainValues = {
-	1 : 0.5, //treadle 1 is 0.5 times default volume
-	2 : 1,
-	3: 1.5,
-	4: 2,
-	5: 2.5,
-	6: 3 //treadle 6 in 3 times default volume
+	1: 3, //treadle 1 is 0.5 times default volume
+	2: 2.5,
+	3: 2,
+	4: 1.5,
+	5: 1,
+	6: 0.5 //treadle 6 in 3 times default volume
 };
 
 function loadSounds(instrumentName, soundArray) {
 	// to align with CORR policy, cannot load local files. Needs to use an url.
 	var folderName = 'https://maitraye.github.io/Weaving-drafting/sounds/';
-	if (instrumentName == 'Organ') { //for tieup, load full organ audio list
-		for (var j=0; j<6; j++) {
-			for (var i=0; i<7; i++) {
-				audioName = folderName + instrumentName + j + '-'+ i + '.mp3';
-				soundArray.push(audioName);	
-			}
-		}
+	// if (instrumentName == 'Piano') { //for tieup, load full organ audio list
+	// 	for (var j=0; j<6; j++) {
+	// 		for (var i=0; i<7; i++) {
+	// 			audioName = folderName + instrumentName + j + '-'+ i + '.mp3';
+	// 			soundArray.push(audioName);	
+	// 		}
+	// 	}
+	// }
+	// else {
+	for (var i=0; i<8; i++) {
+		audioName = folderName + instrumentName + i + '.mp3';
+		soundArray.push(audioName);
 	}
-	else {
-		for (var i=0; i<8; i++) {
-			audioName = folderName + instrumentName + i + '.mp3';
-			soundArray.push(audioName);
-		}
-	}
+	// }
 }
 
 // If you include your js files in the head of your document, make sure to wait for the DOM to be loaded:
@@ -80,7 +80,7 @@ SVG.on(document, 'DOMContentLoaded', function() {
 
 	loadSounds(warpInstrument, threadingSounds);
 	loadSounds(weftInstrument, treadlingSounds);
-	loadSounds('Organ', tieupSounds);
+	loadSounds('Piano', tieupSounds);
 
 	warpColor = RGBToHex(draft['COLOR TABLE'][draft.WARP.Color]);
 	weftColor = RGBToHex(draft['COLOR TABLE'][draft.WEFT.Color]);
@@ -367,11 +367,12 @@ function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellC
 						audioListPlay([soundArray[this.treadleNumber-1]]);
 					}
 					// for tieup play notes in the increasing order from bottom to top, so 6-weftNumber
-					// tieupSounds [14-20] is C4-B4 (regular octave) for Organ sounds
+					
 					else if (gridType == "tieup") { 
-						audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
+						// tieupSounds [14-20] is C4-B4 (regular octave) for Organ sounds changing by octave
+						// audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
 
-						// audioListPlay([soundArray[6-this.weftNumber+14]], gainValues[this.treadleNumber], 0, "Loudness");
+						audioListPlay([soundArray[6-this.weftNumber]], gainValues[this.treadleNumber], 0, "Loudness");
 						// audioListPlay([soundArray[6-this.weftNumber+14]], 0, panValues[this.treadleNumber], "Panning");
 						// audioListPlay([soundArray[6-this.weftNumber+14]]);
 					}
@@ -391,9 +392,9 @@ function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellC
 						audioListPlay([soundArray[this.treadleNumber-1]]);
 					}
 					else if (gridType == "tieup") { 
-						audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
+						// audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
 
-						// audioListPlay([soundArray[6-this.weftNumber+14]], gainValues[this.treadleNumber], 0, "Loudness");
+						audioListPlay([soundArray[6-this.weftNumber]], gainValues[this.treadleNumber], 0, "Loudness");
 						// audioListPlay([soundArray[6-this.weftNumber+14]], 0, panValues[this.treadleNumber], "Panning");
 						// audioListPlay([soundArray[6-this.weftNumber+14]]);
 					}
