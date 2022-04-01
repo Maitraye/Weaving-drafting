@@ -31,6 +31,11 @@ var treadlingSounds = [];
 var tieupSounds = [];
 var warpInstrument = "Guitar";
 var weftInstrument = "Cello";
+var tieupInstrument = "Piano";
+
+var tieupTone = "Musical";
+var tieupOption = "Loudness";
+var tieupReadBy = "Column";
 
 var panValues = {
 	1: -1, //treadle 1 in far left stereo (-1)
@@ -81,7 +86,7 @@ SVG.on(document, 'DOMContentLoaded', function() {
 
 	loadSounds(warpInstrument, threadingSounds);
 	loadSounds(weftInstrument, treadlingSounds);
-	loadSounds('Piano', tieupSounds);
+	loadSounds(tieupInstrument, tieupSounds);
 
 	warpColor = RGBToHex(draft['COLOR TABLE'][draft.WARP.Color]);
 	weftColor = RGBToHex(draft['COLOR TABLE'][draft.WEFT.Color]);
@@ -90,15 +95,13 @@ SVG.on(document, 'DOMContentLoaded', function() {
 
 // updating warp and weft color based on user input in drawdown button
 $('#warpColor').change(function () {
-  var selectedWarpColor = $(this).find("option:selected").text();
-  draft.WARP.Color = selectedWarpColor;
+  draft.WARP.Color = $(this).find("option:selected").text();
   warpColor = RGBToHex(draft['COLOR TABLE'][draft.WARP.Color]);
   computeNewDraft();
 });
 
 $('#weftColor').change(function () {
-  var selectedWeftColor = $(this).find("option:selected").text();
-  draft.WEFT.Color = selectedWeftColor;
+  draft.WEFT.Color = $(this).find("option:selected").text();
   weftColor = RGBToHex(draft['COLOR TABLE'][draft.WEFT.Color]);
   computeNewDraft();
 });
@@ -115,10 +118,21 @@ $('#weftInstrument').change(function () {
   loadSounds(weftInstrument, treadlingSounds);
 });
 
+$('#tieupTone').change(function () {
+  tieupTone = $(this).find("option:selected").text();
+});
+
+$('#tieupOption').change(function () {
+  tieupOption = $(this).find("option:selected").text();
+});
+
+$('#tieupReadBy').change(function () {
+  tieupReadBy = $(this).find("option:selected").text();
+});
+
 // updating reading or editing mode
 $('#mode').change(function () {
-  var selectedMode = $(this).find("option:selected").text();
-  mode = selectedMode;
+  mode = $(this).find("option:selected").text();
 });
 
 $('#verbosity').change(function () {
@@ -150,7 +164,10 @@ var ttsFilenames = {
 	12 : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/twelve.mp3',
 }
 
-
+var earconFileNames = {
+	'on' : 'https://maitraye.github.io/Weaving-drafting/sounds/earcons/notification_simple-01.wav',
+	'off' : 'https://maitraye.github.io/Weaving-drafting/sounds/earcons/navigation_forward-selection-minimal.wav'
+}
 
 // to implement double tap
 var timeout;
@@ -185,7 +202,6 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 					else {
 						audioListPlay([ttsFilenames.on]);
 					}
-					
 
 					for (var h=0; h<heddles.length; h++) {
 						if (heddles[h]!=element) {
@@ -214,8 +230,8 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 							}
 							else if (gridType == "tieup") {
 								// making sure that the bottom row is shaft 1 and top row is shaft 6
-								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
-									ttsFilenames.shaft, ttsFilenames[7-this.weftNumber], ttsFilenames.notTiedup]);
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+									ttsFilenames.shaft, ttsFilenames[7-element.weftNumber], ttsFilenames.notTiedup]);
 							}
 						}
 					}
@@ -233,8 +249,8 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 							}
 							else if (gridType == "tieup") {
 								// making sure that the bottom row is shaft 1 and top row is shaft 6
-								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
-									ttsFilenames.shaft, ttsFilenames[7-this.weftNumber], ttsFilenames.tiedup]);
+								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+									ttsFilenames.shaft, ttsFilenames[7-element.weftNumber], ttsFilenames.tiedup]);
 							}
 						}
 					}
@@ -474,20 +490,47 @@ function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellC
 
 				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.selected || mode == "Edit") {
-					// the leftmost treadle is numbered 1, so subtract 1 
-					// to play notes in the increasing order from left to right
-					if (gridType == "treadling") {
+					if (gridType == "treadling"){ //gridType == treadling
+						// the leftmost treadle is numbered 1, so subtract 1 
+						// to play notes in the increasing order from left to right
 						audioListPlay([soundArray[this.treadleNumber-1]]);
 					}
-					// for tieup play notes in the increasing order from bottom to top, so 6-weftNumber
-					
-					else if (gridType == "tieup") { 
-						// tieupSounds [14-20] is C4-B4 (regular octave) for Organ sounds changing by octave
-						// audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
 
-						audioListPlay([soundArray[6-this.weftNumber]], gainValues[this.treadleNumber], 0, "Loudness");
-						// audioListPlay([soundArray[6-this.weftNumber+14]], 0, panValues[this.treadleNumber], "Panning");
-						// audioListPlay([soundArray[6-this.weftNumber+14]]);
+					else { // gridType == tieup
+						if (tieupTone == "Musical") {
+							if (tieupOption == "Loudness") {
+								if (tieupReadBy == "Column") {
+									// play notes in the increasing order of pitch from bottom to top, (6-weftNumber)
+									// starting with the leftmost column and then going to right with change in loudness or panning
+									audioListPlay([soundArray[6-this.weftNumber]], gainValues[this.treadleNumber], tieupOption);
+
+									// tieupSounds [14-20] is C4-B4 (regular octave) for Organ sounds changing by octave
+									// audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
+									// audioListPlay([soundArray[6-this.weftNumber+14]]);
+								}
+								else { //tieupReadBy == Row
+									// play notes in the increasing order of pitch from left to right, (treadleNumber-1)
+									// starting with the bottom row and then going to top with change in loudness or panning
+									audioListPlay([soundArray[this.treadleNumber-1]], gainValues[7-this.weftNumber], tieupOption);
+								}
+							}
+							else { //tieupOption == Panning
+								if (tieupReadBy == "Column") {
+									audioListPlay([soundArray[6-this.weftNumber]], panValues[this.treadleNumber], tieupOption);
+								}
+								else { // tieupReadBy == Row
+									audioListPlay([soundArray[this.treadleNumber-1]], panValues[7-this.weftNumber], tieupOption);
+								}
+							}
+						}
+					}
+				}
+				if (gridType == "tieup" && tieupOption == "On-off") {
+					if (this.selected) {
+						audioListPlay([earconFileNames.on]);
+					}
+					else {
+						audioListPlay([earconFileNames.off]);
 					}
 				}
 			});
@@ -500,16 +543,49 @@ function computeTreadlingTieup (grid, gridType, jStopvalue, draftSequence, cellC
 			treadle.touchstart(function (event) {
 				this.stroke({color:'#06f', width:15}); 
 
+				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.selected || mode == "Edit") {
-					if (gridType == "treadling") {
+					if (gridType == "treadling"){ //gridType == treadling
+						// the leftmost treadle is numbered 1, so subtract 1 
+						// to play notes in the increasing order from left to right
 						audioListPlay([soundArray[this.treadleNumber-1]]);
 					}
-					else if (gridType == "tieup") { 
-						// audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
 
-						audioListPlay([soundArray[6-this.weftNumber]], gainValues[this.treadleNumber], 0, "Loudness");
-						// audioListPlay([soundArray[6-this.weftNumber+14]], 0, panValues[this.treadleNumber], "Panning");
-						// audioListPlay([soundArray[6-this.weftNumber+14]]);
+					else { // gridType == tieup
+						if (tieupTone == "Musical") {
+							if (tieupOption == "Loudness") {
+								if (tieupReadBy == "Column") {
+									// play notes in the increasing order of pitch from bottom to top, (6-weftNumber)
+									// starting with the leftmost column and then going to right with change in loudness or panning
+									audioListPlay([soundArray[6-this.weftNumber]], gainValues[this.treadleNumber], tieupOption);
+
+									// tieupSounds [14-20] is C4-B4 (regular octave) for Organ sounds changing by octave
+									// audioListPlay([soundArray[7*(this.treadleNumber-1) + (6-this.weftNumber)]]);
+									// audioListPlay([soundArray[6-this.weftNumber+14]]);
+								}
+								else { //tieupReadBy == Row
+									// play notes in the increasing order of pitch from left to right, (treadleNumber-1)
+									// starting with the bottom row and then going to top with change in loudness or panning
+									audioListPlay([soundArray[this.treadleNumber-1]], gainValues[7-this.weftNumber], tieupOption);
+								}
+							}
+							else { //tieupOption == Panning
+								if (tieupReadBy == "Column") {
+									audioListPlay([soundArray[6-this.weftNumber]], panValues[this.treadleNumber], tieupOption);
+								}
+								else { // tieupReadBy == Row
+									audioListPlay([soundArray[this.treadleNumber-1]], panValues[7-this.weftNumber], tieupOption);
+								}
+							}
+						}
+					}
+				}
+				if (gridType == "tieup" && tieupOption == "On-off") {
+					if (this.selected) {
+						audioListPlay([earconFileNames.on]);
+					}
+					else {
+						audioListPlay([earconFileNames.off]);
 					}
 				}
 			});

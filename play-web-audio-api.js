@@ -5,6 +5,7 @@ var tieupSequence = [];
 
 var threadingPlayButton = document.querySelector('#threading-play');
 var treadlingPlayButton = document.querySelector('#treadling-play');
+var tieupPlayButton = document.querySelector('#tieup-play');
 
 function createAudioSequence(instrumentName, type) {
   var folderName = 'https://maitraye.github.io/Weaving-drafting/sounds/';
@@ -40,7 +41,7 @@ var context;
 var bufferLoader;
 
 // function audioListPlay(audioURLs, panValue = 0) {
-function audioListPlay(audioURLs, gainValue = 1, panValue = 0, tieupMode = "") {
+function audioListPlay(audioURLs, gainOrPanValue, tieupOption = "") {
   // Fix up prefixing -- important to create a new context instance here; otherwise does not work
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
   context = new AudioContext();
@@ -61,7 +62,7 @@ function audioListPlay(audioURLs, gainValue = 1, panValue = 0, tieupMode = "") {
       var source = context.createBufferSource();
       source.buffer = bufferList[i];
       var gainNode = context.createGain();
-      gainNode.gain.value = gainValue;
+      gainNode.gain.value = gainOrPanValue;
       source.connect(gainNode).connect(context.destination);
       source.start(i*0.5);
     }
@@ -72,21 +73,21 @@ function audioListPlay(audioURLs, gainValue = 1, panValue = 0, tieupMode = "") {
       var source = context.createBufferSource();
       source.buffer = bufferList[i];
       var panNode = context.createStereoPanner();
-      panNode.pan.value = panValue;
+      panNode.pan.value = gainOrPanValue;
       source.connect(panNode).connect(context.destination);
       source.start(i*0.5);
     }
   }
 
-  if (tieupMode == "") {
+  if (tieupOption == "") {
     bufferLoader = new BufferLoader(context, audioURLs, finishedLoading);
     bufferLoader.load();
   }
-  else if (tieupMode == "Loudness") {
+  else if (tieupOption == "Loudness") {
     bufferLoader = new BufferLoader(context, audioURLs, finishedLoadingGain);
     bufferLoader.load();
   }
-  else if (tieupMode == "Panning") {
+  else if (tieupOption == "Panning") {
     bufferLoader = new BufferLoader(context, audioURLs, finishedLoadingPan);
     bufferLoader.load();
   }

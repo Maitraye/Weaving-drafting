@@ -150,20 +150,27 @@
 				<span class="settingsText"> Tie-up </span>
 
 				<div class="form-floating">
-					<select class="form-select" id="tieupOptions" aria-label = "Representation of tieup">
-						<option selected>Loudness</option>
-					    <option>Panning</option>
-					    <option>On-off tones</option>
+					<select class="form-select" id="tieupTone" aria-label = "Tones for tieup">
+						<option selected>Musical</option>
+					    <option>On-off</option>
 					</select>
-					<label for="tieupOptions">Options</label>
+					<label for="tieupTone">Tones</label>
 				</div>
 
 				<div class="form-floating">
-					<select class="form-select" id="readBy" aria-label = "Read by column or row">
+					<select class="form-select" id="tieupOption" aria-label = "Representation of tieup">
+						<option selected>Loudness</option>
+					    <option>Panning</option>
+					</select>
+					<label for="tieupOption">Change</label>
+				</div>
+
+				<div class="form-floating">
+					<select class="form-select" id="tieupReadBy" aria-label = "Read by column or row">
 					    <option selected>Column</option>
 					    <option>Row</option>
 					</select>
-					<label for="readBy">Read by</label>
+					<label for="tieupReadBy">Read by</label>
 				</div>
 
 				<button class="btn btn-primary btn-sm" data-playing="false" id="tieup-play" role="switch" aria-checked="false">
