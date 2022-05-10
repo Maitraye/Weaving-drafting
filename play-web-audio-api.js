@@ -11,6 +11,7 @@ var tieupPlayButton = document.querySelector('#tieup-play');
 
 function createAudioSequence(instrumentName, type) {
   var folderName = 'https://maitraye.github.io/Weaving-drafting/sounds/';
+  
   // clearing previous sequence
   threadingSequence = [];
   treadlingSequence = [];
@@ -21,8 +22,8 @@ function createAudioSequence(instrumentName, type) {
   var selectedElement = [];
 
   if (type == 'threading') {
-    for (var i=draft.WARP.Threads; i>0; i--) {
-      selectedElement = draft.WEAVING.Shafts - draft.THREADING[i];
+    for (var i=0; i<draft.WARP.Threads; i++) {
+      selectedElement = draft.THREADING[i+1]-1;
       audioFileName = folderName + instrumentName + selectedElement + '.mp3';
       threadingSequence.push(audioFileName);
     }
@@ -41,26 +42,26 @@ function createAudioSequence(instrumentName, type) {
     }
   }
   else { //type == "tieup"
-    if (tieupReadBy == "Row") {
+    if (tieupReadBy == "Column") {
       if (tieupTone == "Musical") {
-        for (var i=draft.WEAVING.Shafts; i>0; i--) { //counting down because tieup number 1 refers to top row/shaft
+        for (var i=0; i<draft.WEAVING.Shafts; i++) {
           // splitting the treadle csv list by ',' and looping through all selected treadles.
-          selectedElement = draft.TIEUP[i].split(','); 
+          selectedElement = draft.TIEUP[i+1].split(','); 
           for (var j=0; j<selectedElement.length;j++) {
             if (selectedElement[j] != "") {
               // and subtracting 1 from treadle value to play the appropriate music note file which starts with index 0
               audioFileName = folderName + instrumentName + (selectedElement[j]-1) + '.mp3';
               tieupSequence.push(audioFileName);
-              tieupPanSequence.push(panValues[7-i]);
-              tieupGainSequence.push(gainValues[7-i]);
+              tieupPanSequence.push(panValues[i+1]);
+              tieupGainSequence.push(gainValues[i+1]);
             }
           }
         } 
       } 
       else { //tieupTone == On-off
-        for (var i=draft.WEAVING.Shafts; i>0; i--) { //counting down because tieup number 1 refers to top row/shaft
+        for (var i=0; i<draft.WEAVING.Shafts; i++) {
           // splitting the treadle csv list by ',' and looping through all selected treadles.
-          selectedElement = draft.TIEUP[i].split(',');
+          selectedElement = draft.TIEUP[i+1].split(',');
           for (var j=1; j<=draft.WEAVING.Treadles; j++) {
             if (selectedElement.includes(j.toString())) { //if the treadle number is in the selectedTreadle list
               tieupSequence.push(earconFileNames.on);
@@ -70,10 +71,11 @@ function createAudioSequence(instrumentName, type) {
             }
           }
           tieupSequence.push(earconFileNames.silence);
+          tieupSequence.push(earconFileNames.silence);
         }
       } 
     }
-    else { //tieupReadBy == Column
+    else { //tieupReadBy == Row
 
     }
   }
@@ -147,7 +149,6 @@ treadlingPlayButton.addEventListener('click', function() {
 
 tieupPlayButton.addEventListener('click', function() {
   createAudioSequence(tieupInstrument, 'tieup');
-  console.log(tieupSequence);
   if (tieupTone == "On-off") {
     audioListPlay(tieupSequence);
   }
