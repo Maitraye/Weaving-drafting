@@ -142,6 +142,15 @@ $('#view').change(function () {
   computeNewDraft();
 });
 
+$('#scrollSwitch').change(function () {
+	if ($(this).is(":checked"))
+	{
+		document.body.classList.remove("stop-scrolling");//checked
+	}
+	else {
+		document.body.classList.add("stop-scrolling"); 
+	}
+});
 
 var ttsFilenames = {
 	'warp' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/warp.mp3',

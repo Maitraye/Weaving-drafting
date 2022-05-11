@@ -14,16 +14,14 @@
 	<script language="javascript" type="text/javascript" src="default-pattern.js"></script>
 
 	<title>Simphony</title>
-	<style> 
-		html {
-			-ms-content-zooming:  none;
-			-ms-touch-action:  none;
-		}			
+	<style> 	
 		body {
 			text-align: center;
-			-ms-content-zooming:  none;
-			-ms-touch-action:  none;
 		}
+		.stop-scrolling {
+            height: 100%;
+            overflow: hidden;
+        }
 		.container {
 			display: block;
 			margin: 0px auto;
@@ -71,7 +69,10 @@
 
 			<!-- data-* attribute adds custom information to a button element for sending a value to js -->
 			<div class="col-md-1" style="width: 10.8333333333%">
-				
+				<div class="form-check form-switch">
+				  <input class="form-check-input" type="checkbox" id="scrollSwitch" checked>
+				  <label class="form-check-label" for="scrollSwitch">Scroll</label>
+				</div>
 				<div class="form-floating">
 					<select class="form-select" id="mode" aria-label = "Mode">
 					    <option selected>Read</option>
