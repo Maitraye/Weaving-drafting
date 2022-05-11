@@ -32,6 +32,7 @@ function createAudioSequence(instrumentName, type) {
     for (var i=0; i<draft.WEFT.Threads; i++) {
       // splitting the treadle csv list by ',' and looping through all selected treadles.
       selectedElement = draft.TREADLING[i+1].split(',');  // adding 1 with the index, since treadling starts from 1 in the 'draft' (pattern.js).
+      selectedElement.sort(); //making sure that the lower number treadles in a row plays first
       for (var j=0; j<selectedElement.length;j++) {
         if (selectedElement[j] != "") {
           // and subtracting 1 from treadle value to play the appropriate music note file which starts with index 0
@@ -47,6 +48,7 @@ function createAudioSequence(instrumentName, type) {
         for (var i=0; i<draft.WEAVING.Shafts; i++) {
           // splitting the treadle csv list by ',' and looping through all selected treadles.
           selectedElement = draft.TIEUP[i+1].split(','); 
+          selectedElement.sort();
           for (var j=0; j<selectedElement.length;j++) {
             if (selectedElement[j] != "") {
               // and subtracting 1 from treadle value to play the appropriate music note file which starts with index 0
