@@ -49,7 +49,8 @@ function createAudioSequence(instrumentName, type) {
             treadlingSequence.push(ttsFilenames[selectedElement[j]]);
           }
         }
-      } 
+      }
+      treadlingSequence.push(earconFileNames.off); 
     }
   }
   else { //type == "tieup"
