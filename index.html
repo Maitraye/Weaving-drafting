@@ -73,21 +73,6 @@
 				  <input class="form-check-input" type="checkbox" id="scrollSwitch" checked>
 				  <label class="form-check-label" for="scrollSwitch">Scroll</label>
 				</div>
-				<div class="form-floating">
-					<select class="form-select" id="mode" aria-label = "Mode">
-					    <option selected>Read</option>
-					    <option>Edit</option>
-					</select>
-					<label for="mode">Mode</label>
-				</div>
-
-				<div class="form-floating">
-					<select class="form-select" id="verbosity" aria-label = "Text-to-speech Verbosity">
-					    <option selected>High</option>
-					    <option>Low</option>
-					</select>
-					<label for="verbosity">Verbosity</label>
-				</div>
 
 				<div class="form-floating">
 					<select class="form-select" id="view" aria-label = "view">
@@ -98,6 +83,30 @@
 					    <option>Tie-up</option>
 					</select>
 					<label for="view">Presentation</label>
+				</div>
+
+				<div class="form-floating">
+					<select class="form-select" id="mode" aria-label = "Mode">
+					    <option selected>Read</option>
+					    <option>Edit</option>
+					</select>
+					<label for="mode">Mode</label>
+				</div>
+
+				<div class="form-floating">
+					<select class="form-select" id="audioFormat" aria-label = "audio format">
+					    <option selected>Musical</option>
+					    <option>Verbal</option>
+					</select>
+					<label for="mode">Audio Format</label>
+				</div>
+
+				<div class="form-floating">
+					<select class="form-select" id="verbosity" aria-label = "Text-to-speech Verbosity">
+					    <option>High</option>
+					    <option selected>Low</option>
+					</select>
+					<label for="verbosity">Verbosity</label>
 				</div>
 			
 				<hr>
@@ -212,6 +221,11 @@
 				<button class="btn btn-primary btn-sm" data-playing="false" id="tieup-play" role="switch" aria-checked="false">
 					<span>Play Tie-up</span>
 				</button>
+
+				<div class="form-check form-switch">
+				  <input class="form-check-input" type="checkbox" id="scrollSwitch1" checked>
+				  <label class="form-check-label" for="scrollSwitch1">Scroll</label>
+				</div>
 
 			</div>
 		</div>

@@ -22,22 +22,32 @@ function createAudioSequence(instrumentName, type) {
   var selectedElement = [];
 
   if (type == 'threading') {
-    for (var i=0; i<draft.WARP.Threads; i++) {
-      selectedElement = draft.THREADING[i+1]-1;
-      audioFileName = folderName + instrumentName + selectedElement + '.mp3';
-      threadingSequence.push(audioFileName);
+    for (var i=1; i<=draft.WARP.Threads; i++) { //starting i with 1, since threading starts from 1 in the 'draft' (pattern.js).
+      if (audioFormat == "Musical") {
+        selectedElement = draft.THREADING[i]-1;
+        audioFileName = folderName + instrumentName + selectedElement + '.mp3';
+        threadingSequence.push(audioFileName);
+      }
+      else {
+        threadingSequence.push(ttsFilenames[draft.THREADING[i]]);
+      }
     }
   }
   else if (type == 'treadling') {
-    for (var i=0; i<draft.WEFT.Threads; i++) {
+    for (var i=1; i<=draft.WEFT.Threads; i++) { //starting i with 1, since treadling starts from 1 in the 'draft' (pattern.js).
       // splitting the treadle csv list by ',' and looping through all selected treadles.
-      selectedElement = draft.TREADLING[i+1].split(',');  // adding 1 with the index, since treadling starts from 1 in the 'draft' (pattern.js).
+      selectedElement = draft.TREADLING[i].split(',');  
       selectedElement.sort(); //making sure that the lower number treadles in a row plays first
       for (var j=0; j<selectedElement.length;j++) {
         if (selectedElement[j] != "") {
-          // and subtracting 1 from treadle value to play the appropriate music note file which starts with index 0
-          audioFileName = folderName + instrumentName + (selectedElement[j]-1) + '.mp3';
-          treadlingSequence.push(audioFileName);
+          if (audioFormat == "Musical") {
+            // and subtracting 1 from treadle value to play the appropriate music note file which starts with index 0
+            audioFileName = folderName + instrumentName + (selectedElement[j]-1) + '.mp3';
+            treadlingSequence.push(audioFileName);
+          }
+          else {
+            treadlingSequence.push(ttsFilenames[selectedElement[j]]);
+          }
         }
       } 
     }
@@ -45,25 +55,25 @@ function createAudioSequence(instrumentName, type) {
   else { //type == "tieup"
     if (tieupReadBy == "Column") {
       if (tieupTone == "Musical") {
-        for (var i=0; i<draft.WEAVING.Shafts; i++) {
+        for (var i=1; i<=draft.WEAVING.Shafts; i++) {
           // splitting the treadle csv list by ',' and looping through all selected treadles.
-          selectedElement = draft.TIEUP[i+1].split(','); 
+          selectedElement = draft.TIEUP[i].split(','); 
           selectedElement.sort();
           for (var j=0; j<selectedElement.length;j++) {
             if (selectedElement[j] != "") {
               // and subtracting 1 from treadle value to play the appropriate music note file which starts with index 0
               audioFileName = folderName + instrumentName + (selectedElement[j]-1) + '.mp3';
               tieupSequence.push(audioFileName);
-              tieupPanSequence.push(panValues[i+1]);
-              tieupGainSequence.push(gainValues[i+1]);
+              tieupPanSequence.push(panValues[i]);
+              tieupGainSequence.push(gainValues[i]);
             }
           }
         } 
       } 
       else { //tieupTone == On-off
-        for (var i=0; i<draft.WEAVING.Shafts; i++) {
+        for (var i=1; i<=draft.WEAVING.Shafts; i++) {
           // splitting the treadle csv list by ',' and looping through all selected treadles.
-          selectedElement = draft.TIEUP[i+1].split(',');
+          selectedElement = draft.TIEUP[i].split(',');
           for (var j=1; j<=draft.WEAVING.Treadles; j++) {
             if (selectedElement.includes(j.toString())) { //if the treadle number is in the selectedTreadle list
               tieupSequence.push(earconFileNames.on);

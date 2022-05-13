@@ -3,9 +3,11 @@ var maxThreadWidth = 82; // for zoomed single grid views 82 and 85
 var threadSpacing = 10; // drawdown gridlines
 
 var mode = "Read";
-var verbosity = "High";
+var verbosity = "Low";
 var view = "Entire draft";
 var drawdownSound = "Warp & Weft";
+var audioFormat = "Musical";
+var scrollOn = true;
 
 var warpColor;
 var weftColor;
@@ -129,6 +131,10 @@ $('#mode').change(function () {
   mode = $(this).find("option:selected").text();
 });
 
+$('#audioFormat').change(function () {
+  audioFormat = $(this).find("option:selected").text();
+});
+
 $('#verbosity').change(function () {
   verbosity = $(this).find("option:selected").text();
 });
@@ -142,14 +148,39 @@ $('#view').change(function () {
   computeNewDraft();
 });
 
-$('#scrollSwitch').change(function () {
-	if ($(this).is(":checked"))
-	{
+function toggleScroll() {
+	if (scrollOn) {
 		document.body.classList.remove("stop-scrolling");//checked
 	}
 	else {
 		document.body.classList.add("stop-scrolling"); 
 	}
+}
+
+$('#scrollSwitch').change(function () {
+	if ($(this).is(":checked"))
+	{
+		scrollOn = true;
+		// $('#scrollSwitch1').bootstrapSwitch('state', true, false); // Set the state as on and do not trigger switchChange event
+	}
+	else {
+		scrollOn = false; 
+		// $('#scrollSwitch1').bootstrapSwitch('state', false, false); // Set the state as on and do not trigger switchChange event
+	}
+	toggleScroll();
+});
+
+$('#scrollSwitch1').change(function () {
+	if ($(this).is(":checked"))
+	{
+		scrollOn = true;
+		// $('#scrollSwitch').bootstrapSwitch('state', true, false); // Set the state as on and do not trigger switchChange event
+	}
+	else {
+		scrollOn = false;
+		// $('#scrollSwitch').bootstrapSwitch('state', false, false); // Set the state as on and do not trigger switchChange event
+	}
+	toggleScroll();
 });
 
 var ttsFilenames = {
@@ -207,11 +238,12 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 					element.fill(cellColor);
 
 					if (verbosity == "High") {
-						audioListPlay([ttsFilenames.shaft, ttsFilenames[element.shaftNumber], 
+						// adding a silence first so that verbal announcement for single tap does not get overridden 
+						audioListPlay([earconFileNames.silence, ttsFilenames.shaft, ttsFilenames[element.shaftNumber], 
 							ttsFilenames.warp, ttsFilenames[element.warpNumber], ttsFilenames.on]);
 					}
 					else {
-						audioListPlay([ttsFilenames.on]);
+						audioListPlay([earconFileNames.silence, ttsFilenames.on]);
 					}
 
 					for (var h=0; h<heddles.length; h++) {
@@ -232,14 +264,14 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 						draftSequence[element.weftNumber] = csvRemove(draftSequence[element.weftNumber], element.treadleNumber);
 						
 						if (verbosity == "Low") {
-							audioListPlay([ttsFilenames.off]);
+							audioListPlay([earconFileNames.silence, ttsFilenames.off]);
 						}
 						else {
 							if (gridType == "treadling") {
-								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+								audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
 								ttsFilenames.weft, ttsFilenames[element.weftNumber], ttsFilenames.off]);
 							}
-							else if (gridType == "tieup") {
+							else if (gridType == "tieup") { // Verbal is not implemented for tie-up; so no need to add silence
 								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
 									ttsFilenames.shaft, ttsFilenames[element.weftNumber], ttsFilenames.notTiedup]);
 							}
@@ -254,10 +286,10 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 						}
 						else {
 							if (gridType == "treadling") {
-								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+								audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
 									ttsFilenames.weft, ttsFilenames[element.weftNumber], ttsFilenames.on]);
 							}
-							else if (gridType == "tieup") {
+							else if (gridType == "tieup") { // Verbal is not implemented for tie-up; so no need to add silence
 								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
 									ttsFilenames.shaft, ttsFilenames[element.weftNumber], ttsFilenames.tiedup]);
 							}
@@ -403,11 +435,11 @@ function computeThreading (threadWidth, grid) {
 						// audioListPlay([ttsFilenames.shaft, ttsFilenames[7-this.shaftNumber], 
 						// ttsFilenames.warp, ttsFilenames[13-this.warpNumber], ttsFilenames.on]);
 
-						audioListPlay([ttsFilenames.shaft, ttsFilenames[this.shaftNumber], 
+						audioListPlay([earconFileNames.silence, ttsFilenames.shaft, ttsFilenames[this.shaftNumber], 
 						ttsFilenames.warp, ttsFilenames[this.warpNumber], ttsFilenames.on]);
 					}
 					else {
-						audioListPlay([ttsFilenames.on]);
+						audioListPlay([earconFileNames.silence, ttsFilenames.on]);
 					}
 
 					for (var h=0; h<heddles.length; h++) {
@@ -422,16 +454,20 @@ function computeThreading (threadWidth, grid) {
 			});
 
 			heddle.mouseover(function () {
-				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
+				// this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
 				
 				// play sound only when edit mode OR 
 				// when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.shaftNumber == parseInt(draft.THREADING[this.warpNumber]) || mode == "Edit") {
 
-					// audioListPlay([threadingSounds[draft.WEAVING.Shafts - this.shaftNumber]]);
-					audioListPlay([threadingSounds[this.shaftNumber-1]]);
+					if (audioFormat == "Musical") {
+						// audioListPlay([threadingSounds[draft.WEAVING.Shafts - this.shaftNumber]]);
+						audioListPlay([threadingSounds[this.shaftNumber-1]]);
+					}
+					else { // if audio format is "Verbal"
+						audioListPlay([ttsFilenames[this.shaftNumber]]);
+					}
 				}
-				
 			});
 
 			heddle.mouseout(function () {
@@ -440,9 +476,15 @@ function computeThreading (threadWidth, grid) {
 
 			// same work as mouseover event -- gridline color and width change to blue when touchstart
 			heddle.touchstart(function (event) {
-				this.stroke({color:'#06f', width:15}); 
+				// commenting out blue highlight
+				// this.stroke({color:'#06f', width:15}); 
 				if (this.shaftNumber == parseInt(draft.THREADING[this.warpNumber]) || mode == "Edit") {
-					audioListPlay([threadingSounds[this.shaftNumber-1]]);
+					if (audioFormat == "Musical") {
+						audioListPlay([threadingSounds[this.shaftNumber-1]]);
+					}
+					else { // if audio format is "Verbal"
+						audioListPlay([ttsFilenames[this.shaftNumber]]);
+					}
 				}
 			});
 
@@ -496,10 +538,10 @@ function computeCommonTreadling (threadWidth, grid) {
 						draft.TREADLING[this.weftNumber] = csvRemove(draft.TREADLING[this.weftNumber], this.treadleNumber);
 
 						if (verbosity == "Low") {
-							audioListPlay([ttsFilenames.off]);
+							audioListPlay([earconFileNames.silence, ttsFilenames.off]);
 						}
 						else {
-							audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
 								ttsFilenames.weft, ttsFilenames[this.weftNumber], ttsFilenames.off]);
 						}	
 					}
@@ -509,10 +551,10 @@ function computeCommonTreadling (threadWidth, grid) {
 						draft.TREADLING[this.weftNumber] = csvAdd(draft.TREADLING[this.weftNumber], this.treadleNumber);
 						
 						if (verbosity == "Low") {
-							audioListPlay([ttsFilenames.on]);
+							audioListPlay([earconFileNames.silence, ttsFilenames.on]);
 						}
 						else {
-							audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
 								ttsFilenames.weft, ttsFilenames[this.weftNumber], ttsFilenames.on]);
 						}
 					}
@@ -522,13 +564,18 @@ function computeCommonTreadling (threadWidth, grid) {
 			});
 
 			treadle.mouseover(function () {
-				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
+				// this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
 
 				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.selected || mode == "Edit") {
-					// the leftmost treadle is numbered 1, so subtract 1 
-					// to play notes in the increasing order from left to right
-					audioListPlay([treadlingSounds[this.treadleNumber-1]]);
+					if (audioFormat == "Musical") {
+						// the leftmost treadle is numbered 1, so subtract 1 
+						// to play notes in the increasing order from left to right
+						audioListPlay([treadlingSounds[this.treadleNumber-1]]);
+					}
+					else {
+						audioListPlay ([ttsFilenames[this.treadleNumber]]);
+					}
 				}
 			});
 
@@ -538,13 +585,17 @@ function computeCommonTreadling (threadWidth, grid) {
 
 			// same work as mouseover event -- gridline color and width change to blue when touchstart
 			treadle.touchstart(function (event) {
-				this.stroke({color:'#06f', width:15}); 
+				// commenting out blue highlight on touch
+				// this.stroke({color:'#06f', width:15}); 
 
 				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.selected || mode == "Edit") {
-					// the leftmost treadle is numbered 1, so subtract 1 
-					// to play notes in the increasing order from left to right
-					audioListPlay([treadlingSounds[this.treadleNumber-1]]);
+					if (audioFormat == "Musical") {
+						audioListPlay([treadlingSounds[this.treadleNumber-1]]);
+					}
+					else {
+						audioListPlay ([ttsFilenames[this.treadleNumber]]);
+					}
 				}
 			});
 
@@ -593,10 +644,10 @@ function computeTreadling (threadWidth, grid) {
 						draft.TREADLING[this.weftNumber] = csvRemove(draft.TREADLING[this.weftNumber], this.treadleNumber);
 
 						if (verbosity == "Low") {
-							audioListPlay([ttsFilenames.off]);
+							audioListPlay([earconFileNames.silence, ttsFilenames.off]);
 						}
 						else {
-							audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
 								ttsFilenames.weft, ttsFilenames[this.weftNumber], ttsFilenames.off]);
 						}	
 					}
@@ -606,10 +657,10 @@ function computeTreadling (threadWidth, grid) {
 						draft.TREADLING[this.weftNumber] = csvAdd(draft.TREADLING[this.weftNumber], this.treadleNumber);
 						
 						if (verbosity == "Low") {
-							audioListPlay([ttsFilenames.on]);
+							audioListPlay([earconFileNames.silence, ttsFilenames.on]);
 						}
 						else {
-							audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
 								ttsFilenames.weft, ttsFilenames[this.weftNumber], ttsFilenames.on]);
 						}
 					}
@@ -619,13 +670,18 @@ function computeTreadling (threadWidth, grid) {
 			});
 
 			treadle.mouseover(function () {
-				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
+				// this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
 
 				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.selected || mode == "Edit") {
-					// the leftmost treadle is numbered 1, so subtract 1 
-					// to play notes in the increasing order from left to right
-					audioListPlay([treadlingSounds[this.treadleNumber-1]]);
+					if (audioFormat == "Musical") {
+						// the leftmost treadle is numbered 1, so subtract 1 
+						// to play notes in the increasing order from left to right
+						audioListPlay([treadlingSounds[this.treadleNumber-1]]);
+					}
+					else {
+						audioListPlay([ttsFilenames[this.treadleNumber]]);
+					}
 				}
 			});
 
@@ -635,11 +691,17 @@ function computeTreadling (threadWidth, grid) {
 
 			// same work as mouseover event -- gridline color and width change to blue when touchstart
 			treadle.touchstart(function (event) {
-				this.stroke({color:'#06f', width:15}); 
+				// commenting out blue highlight on touch
+				// this.stroke({color:'#06f', width:15}); 
 
 				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.selected || mode == "Edit") {
-					audioListPlay([treadlingSounds[this.treadleNumber-1]]);
+					if (audioFormat == "Musical") {
+						audioListPlay([treadlingSounds[this.treadleNumber-1]]);
+					}
+					else {
+						audioListPlay([ttsFilenames[this.treadleNumber]]);
+					}
 				}
 			});
 
@@ -692,10 +754,10 @@ function computeTieup (threadWidth, grid) {
 						draft.TIEUP[this.treadleNumber] = csvRemove(draft.TIEUP[this.treadleNumber], this.weftNumber);
 
 						if (verbosity == "Low") {
-							audioListPlay([ttsFilenames.off]);
+							audioListPlay([earconFileNames.silence, ttsFilenames.off]);
 						}
 						else {
-							audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
 								ttsFilenames.shaft, ttsFilenames[this.weftNumber], ttsFilenames.notTiedup]);		
 						}	
 					}
@@ -705,10 +767,10 @@ function computeTieup (threadWidth, grid) {
 						draft.TIEUP[this.treadleNumber] = csvAdd(draft.TIEUP[this.treadleNumber], this.weftNumber);
 						
 						if (verbosity == "Low") {
-							audioListPlay([ttsFilenames.on]);
+							audioListPlay([earconFileNames.silence, ttsFilenames.on]);
 						}
 						else {
-							audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
 								ttsFilenames.shaft, ttsFilenames[this.weftNumber], ttsFilenames.tiedup]);
 						}
 					}
@@ -718,7 +780,7 @@ function computeTieup (threadWidth, grid) {
 			});
 
 			treadle.mouseover(function () {
-				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
+				// this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
 
 				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.selected || mode == "Edit") {
@@ -761,7 +823,8 @@ function computeTieup (threadWidth, grid) {
 
 			// same work as mouseover event -- gridline color and width change to blue when touchstart
 			treadle.touchstart(function (event) {
-				this.stroke({color:'#06f', width:15}); 
+				// commenting out blue highlight on touch
+				// this.stroke({color:'#06f', width:15}); 
 
 				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
 				if (this.selected || mode == "Edit") {
@@ -1033,20 +1096,40 @@ function computeDrawdown (threadWidth, grid) {
 			interlacement.click(function(){
 				if (drawdownSound == "Warp & Weft") {
 					if (this.warpUp) {
-						audioListPlay([threadingSounds[0]]);
+						if (audioFormat == "Musical") {
+							audioListPlay([threadingSounds[0]]);
+						}
+						else {
+							audioListPlay([ttsFilenames.warp]);
+						}
 					}
 					else {
-						audioListPlay([treadlingSounds[0]]);
+						if (audioFormat == "Musical") {
+							audioListPlay([treadlingSounds[0]]);
+						}
+						else {
+							audioListPlay([ttsFilenames.weft]);
+						}
 					}
 				}
 				else if (drawdownSound == "Warp only") {
 					if (this.warpUp) {
-						audioListPlay([threadingSounds[0]]);
+						if (audioFormat == "Musical") {
+							audioListPlay([threadingSounds[0]]);
+						}
+						else {
+							audioListPlay([ttsFilenames.warp]);
+						}
 					}
 				}
 				else { // drawdownSound = Weft only
 					if (!this.warpUp) {
-						audioListPlay([treadlingSounds[0]]);
+						if (audioFormat == "Musical") {
+							audioListPlay([treadlingSounds[0]]);
+						}
+						else {
+							audioListPlay([ttsFilenames.weft]);
+						}
 					}
 				}
 			});
