@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<!-- Required meta tags for Bootstrap (width and initial-scale); user-scalable and maximum-scale is set for disabling zoom function on double-tap although recent browsers don't need this -->
+	<!-- Required meta tags for Bootstrap (width and initial-scale); user-scalable and maximum-scale is set for disabling zoom function on double-tap although doesn't work -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
 
 	<!-- Bootstrap CSS -->
@@ -17,6 +17,7 @@
 	<style> 	
 		body {
 			text-align: center;
+/*			touch-action:  none;*/
 		}
 		.stop-scrolling {
             height: 100%;
@@ -71,7 +72,12 @@
 			<div class="col-md-1" style="width: 10.8333333333%">
 				<div class="form-check form-switch">
 				  <input class="form-check-input" type="checkbox" id="scrollSwitch" checked>
-				  <label class="form-check-label" for="scrollSwitch">Scroll</label>
+				  <label class="form-check-label" for="scrollSwitch">Scroll/Zoom</label>
+				</div>
+
+				<div class="form-check form-switch">
+				  <input class="form-check-input" type="checkbox" id="buttonsActiveSwitch" checked>
+				  <label class="form-check-label" for="buttonsActiveSwitch">Buttons active</label>
 				</div>
 
 				<div class="form-floating">
@@ -224,7 +230,7 @@
 
 				<div class="form-check form-switch">
 				  <input class="form-check-input" type="checkbox" id="scrollSwitch1" checked>
-				  <label class="form-check-label" for="scrollSwitch1">Scroll</label>
+				  <label class="form-check-label" for="scrollSwitch1">Scroll/Zoom</label>
 				</div>
 
 			</div>

@@ -161,11 +161,12 @@ $('#scrollSwitch').change(function () {
 	if ($(this).is(":checked"))
 	{
 		scrollOn = true;
-		// $('#scrollSwitch1').bootstrapSwitch('state', true, false); // Set the state as on and do not trigger switchChange event
+		$('body').css("touch-action", "auto"); //to turn pinch zoom on -- default to browser property
+		// $('#scrollSwitch').bootstrapSwitch('state', false, false); // Set the state as on and do not trigger switchChange event
 	}
 	else {
 		scrollOn = false; 
-		// $('#scrollSwitch1').bootstrapSwitch('state', false, false); // Set the state as on and do not trigger switchChange event
+		$('body').css("touch-action", "none"); //to turn pinch zoom off
 	}
 	toggleScroll();
 });
@@ -174,14 +175,44 @@ $('#scrollSwitch1').change(function () {
 	if ($(this).is(":checked"))
 	{
 		scrollOn = true;
-		// $('#scrollSwitch').bootstrapSwitch('state', true, false); // Set the state as on and do not trigger switchChange event
+		$('body').css("touch-action", "auto"); //to turn pinch zoom on -- default to browser property
 	}
 	else {
 		scrollOn = false;
-		// $('#scrollSwitch').bootstrapSwitch('state', false, false); // Set the state as on and do not trigger switchChange event
+		$('body').css("touch-action", "none"); //to turn pinch zoom off
 	}
 	toggleScroll();
 });
+
+
+// function for disabling or enabling select and buttons
+jQuery.fn.extend({
+  disable: function(state) {
+    return this.each(function() {
+      var $this = $(this);
+      if ($this.is('select, button'))
+        this.disabled = state;
+      else
+        $this.toggleClass('disabled', state);
+    });
+  }
+});
+
+$('#buttonsActiveSwitch').change(function () {
+	if ($(this).is(":checked"))
+	{
+		$('select, button').disable(false);
+	}
+	else {
+		$('select, button').disable(true);
+	}
+});
+
+// turning off right click
+document.addEventListener("contextmenu", function (e){
+    e.preventDefault();
+}, false);
+
 
 var ttsFilenames = {
 	'warp' : 'https://maitraye.github.io/Weaving-drafting/sounds/tts/warp.mp3',
