@@ -34,7 +34,7 @@ function RGBToHex(rgb) {
 var threadingSounds = [];
 var treadlingSounds = [];
 var tieupSounds = [];
-var warpInstrument = "Guitar";
+var warpInstrument = "Piano";
 var weftInstrument = "Cello";
 var tieupInstrument = "Piano";
 

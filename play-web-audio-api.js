@@ -97,7 +97,6 @@ function createAudioSequence(instrumentName, type) {
 var context;
 var bufferLoader;
 
-// function audioListPlay(audioURLs, panValue = 0) {
 function audioListPlay(audioURLs, gainOrPanValues = [], selectedTieupOption = "") {
   // Fix up prefixing -- important to create a new context instance here; otherwise does not work
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
