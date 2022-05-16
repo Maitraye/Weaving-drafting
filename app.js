@@ -230,10 +230,10 @@ $('#buttonsActiveSwitch').change(function () {
 	}
 });
 
-// // turning off right click
-// document.addEventListener("contextmenu", function (e){
-//     e.preventDefault();
-// }, false);
+// turning off right click
+document.addEventListener("contextmenu", function (e){
+    e.preventDefault();
+}, false);
 
 
 var ttsFilenames = {
