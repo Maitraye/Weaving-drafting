@@ -126,6 +126,28 @@ $('#tieupReadBy').change(function () {
   tieupReadBy = $(this).find("option:selected").text();
 });
 
+// $('#threadingClear').on('click', function() {
+//   for (var i=1; i<=draft.WARP.Threads; i++) {
+//   	draft.THREADING[i] = "";
+//   }
+//   computeNewDraft();
+// });
+
+$('#treadlingClear').on('click', function() {
+  for (var i=1; i<=draft.WEFT.Threads; i++) {
+  	draft.TREADLING[i] = "";
+  }
+  computeNewDraft();
+});
+
+$('#tieupClear').on('click', function() {
+  for (var i=1; i<=draft.WEAVING.Shafts; i++) {
+  	draft.TIEUP[i] = "";
+  }
+  computeNewDraft();
+});
+
+
 // updating reading or editing mode
 $('#mode').change(function () {
   mode = $(this).find("option:selected").text();
@@ -208,10 +230,10 @@ $('#buttonsActiveSwitch').change(function () {
 	}
 });
 
-// turning off right click
-document.addEventListener("contextmenu", function (e){
-    e.preventDefault();
-}, false);
+// // turning off right click
+// document.addEventListener("contextmenu", function (e){
+//     e.preventDefault();
+// }, false);
 
 
 var ttsFilenames = {
@@ -894,207 +916,6 @@ function computeTieup (threadWidth, grid) {
 		}
 	}
 }
-
-
-// function computeTreadlingTieup (threadWidth, grid, gridType, jStopvalue, draftSequence, cellColor, soundArray) {
-// 	// grid = treadling or tieup
-// 	// jStopvalue = draft.WEFT.Threads (for treadling) or draft.WEAVING.Shafts (for tieup)
-	
-// 	for (var j=0; j<jStopvalue; j++) {
-// 		var currentRow = grid.group();
-		
-// 		for (var i=0; i<draft.WEAVING.Treadles; i++) {
-// 			// creating row of treadles for each weft thread; 
-// 			// total no. of rects in each row equals to number of total treadles
-// 			var treadle = grid.rect(threadWidth, threadWidth).move(i*threadWidth, j*threadWidth);
-// 			treadle.stroke({color:'#000', width:10}); //gridline color and width in tieup and treadling
-// 			treadle.addTo(currentRow);
-
-// 			treadle.treadleNumber = i+1;
-
-// 			if (gridType == "treadling") {
-// 				treadle.weftNumber = j+1;
-// 			}
-// 			else {
-// 				// making sure that the bottom row is shaft 1 and top row is shaft 6 for tieup
-// 				treadle.weftNumber = draft.WEAVING.Shafts-j;
-// 			}
-
-// 			treadle.fill("#fff");
-// 			treadle.selected = false;
-
-// 			// multiple treadles can be pressed at once (in treadling) or a treadle can be tied to multiple shafts (in tieup)
-// 			// splitting the sequence saved in draft pattern by ',' and looping through all selected treadles.
-// 			// draftSequence is draft.TREADLING or draft.TIEUP
-
-// 			if (gridType == "treadling") {
-// 				var currentRowDraft = (draftSequence[treadle.weftNumber] + "").split(",");
-// 				for (var t=0; t<currentRowDraft.length; t++) {
-// 					if (parseInt(currentRowDraft[t]) == treadle.treadleNumber) {
-// 						treadle.selected = true;
-// 						treadle.fill({color: cellColor});
-// 					}
-// 				}
-// 			}
-// 			else {
-// 				var currentRowDraft = (draftSequence[treadle.treadleNumber] + "").split(",");
-// 				for (var t=0; t<currentRowDraft.length; t++) {
-// 					if (parseInt(currentRowDraft[t]) == treadle.weftNumber) {
-// 						treadle.selected = true;
-// 						treadle.fill({color: cellColor});
-// 					}
-// 				}
-// 			}
-
-// 			// unselect a treadle if selected already, else select.
-// 			treadle.click(function () {
-// 				// only when Edit mode is on
-// 				// only when clicked by a mouse -- to change the default tap behavior
-// 				if (mode == "Edit" && event.pointerType == "mouse") {
-// 					if (this.selected) {
-// 						this.selected = false;
-// 						this.fill("#fff");
-// 						draftSequence[this.weftNumber] = csvRemove(draftSequence[this.weftNumber], this.treadleNumber);
-
-// 						if (verbosity == "Low") {
-// 							audioListPlay([ttsFilenames.off]);
-// 						}
-// 						else {
-// 							if (gridType == "treadling") {
-// 								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
-// 									ttsFilenames.weft, ttsFilenames[this.weftNumber], ttsFilenames.off]);
-// 							}
-// 							else if (gridType == "tieup") {
-// 								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
-// 									ttsFilenames.shaft, ttsFilenames[this.weftNumber], ttsFilenames.notTiedup]);
-// 							}
-// 						}	
-// 					}
-// 					else {
-// 						this.selected = true;
-// 						this.fill(cellColor);
-// 						draftSequence[this.weftNumber] = csvAdd(draftSequence[this.weftNumber], this.treadleNumber);
-						
-// 						if (verbosity == "Low") {
-// 							audioListPlay([ttsFilenames.on]);
-// 						}
-// 						else {
-// 							if (gridType == "treadling") {
-// 								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
-// 									ttsFilenames.weft, ttsFilenames[this.weftNumber], ttsFilenames.on]);
-// 							}
-// 							else if (gridType == "tieup") {
-// 								audioListPlay([ttsFilenames.treadle, ttsFilenames[this.treadleNumber], 
-// 									ttsFilenames.shaft, ttsFilenames[this.weftNumber], ttsFilenames.tiedup]);
-// 							}
-// 						}
-// 					}
-
-// 					updateDraft();
-// 				}
-// 			});
-
-// 			treadle.mouseover(function () {
-// 				this.stroke({color:'#06f', width:15}); // gridline color and width when mouseover
-
-// 				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
-// 				if (this.selected || mode == "Edit") {
-// 					if (gridType == "treadling"){ //gridType == treadling
-// 						// the leftmost treadle is numbered 1, so subtract 1 
-// 						// to play notes in the increasing order from left to right
-// 						audioListPlay([soundArray[this.treadleNumber-1]]);
-// 					}
-
-// 					else { // gridType == tieup
-// 						if (tieupTone == "Musical") {
-// 							if (tieupOption == "Loudness") {
-// 								if (tieupReadBy == "Column") {
-// 									// play notes in the increasing order of pitch from bottom to top
-// 									// starting with the leftmost column and then going to right with change in loudness or panning
-// 									// audioListPlay([soundArray[6-this.weftNumber]], [gainValues[this.treadleNumber]], tieupOption);
-
-// 									audioListPlay([soundArray[this.weftNumber-1]], [gainValues[this.treadleNumber]], tieupOption);
-// 								}
-// 								else { //tieupReadBy == Row
-// 									// play notes in the increasing order of pitch from left to right, (treadleNumber-1)
-// 									// starting with the bottom row and then going to top with change in loudness or panning
-// 									// audioListPlay([soundArray[this.treadleNumber-1]], [gainValues[7-this.weftNumber]], tieupOption);
-
-// 									audioListPlay([soundArray[this.treadleNumber-1]], [gainValues[this.weftNumber]], tieupOption);
-// 								}
-// 							}
-// 							else { //tieupOption == Panning
-// 								if (tieupReadBy == "Column") {
-// 									audioListPlay([soundArray[this.weftNumber-1]], [panValues[this.treadleNumber]], tieupOption);
-// 								}
-// 								else { // tieupReadBy == Row
-// 									audioListPlay([soundArray[this.treadleNumber-1]], [panValues[this.weftNumber]], tieupOption);
-// 								}
-// 							}
-// 						}
-// 					}
-// 				}
-// 				if (gridType == "tieup" && tieupTone == "On-off") {
-// 					if (this.selected) {
-// 						audioListPlay([earconFileNames.on]);
-// 					}
-// 					else {
-// 						audioListPlay([earconFileNames.off]);
-// 					}
-// 				}
-// 			});
-
-// 			treadle.mouseout(function () {
-// 				this.stroke({color:'#000', width:10}); // gridline color and width when mouseout
-// 			});
-
-// 			// same work as mouseover event -- gridline color and width change to blue when touchstart
-// 			treadle.touchstart(function (event) {
-// 				this.stroke({color:'#06f', width:15}); 
-
-// 				// play sound only when edit mode OR when not in edit mode (i.e., read mode), play only when the cell is selected
-// 				if (this.selected || mode == "Edit") {
-// 					if (gridType == "treadling"){ //gridType == treadling
-// 						audioListPlay([soundArray[this.treadleNumber-1]]);
-// 					}
-
-// 					else { // gridType == tieup
-// 						if (tieupTone == "Musical") {
-// 							if (tieupOption == "Loudness") {
-// 								if (tieupReadBy == "Column") {
-// 									audioListPlay([soundArray[this.weftNumber-1]], [gainValues[this.treadleNumber]], tieupOption);
-// 								}
-// 								else { //tieupReadBy == Row
-// 									audioListPlay([soundArray[this.treadleNumber-1]], [gainValues[this.weftNumber]], tieupOption);
-// 								}
-// 							}
-// 							else { //tieupOption == Panning
-// 								if (tieupReadBy == "Column") {
-// 									audioListPlay([soundArray[this.weftNumber-1]], [panValues[this.treadleNumber]], tieupOption);
-// 								}
-// 								else { // tieupReadBy == Row
-// 									audioListPlay([soundArray[this.treadleNumber-1]], [panValues[this.weftNumber]], tieupOption);
-// 								}
-// 							}
-// 						}
-// 					}
-// 				}
-// 				if (gridType == "tieup" && tieupTone == "On-off") {
-// 					if (this.selected) {
-// 						audioListPlay([earconFileNames.on]);
-// 					}
-// 					else {
-// 						audioListPlay([earconFileNames.off]);
-// 					}
-// 				}
-// 			});
-
-// 			treadle.touchend(function(event){
-// 				tapHandler (this, gridType, draftSequence, cellColor, event);
-// 			});
-// 		}
-// 	}
-// }
 
 function computeDrawdown (threadWidth, grid) {
 	// for (var i=0; i<draft.WEFT.Threads; i++) {
