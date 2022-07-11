@@ -71,17 +71,17 @@
 			<!-- data-* attribute adds custom information to a button element for sending a value to js -->
 			<div class="col-md-1" style="width: 10.8333333333%">
 				<div class="form-check form-switch">
-				  <input class="form-check-input" type="checkbox" id="scrollSwitch" checked>
+				  <input class="form-check-input" type="checkbox" id="scrollSwitch" checked role="switch" aria-checked="true">
 				  <label class="form-check-label" for="scrollSwitch">Scroll/Zoom</label>
 				</div>
 
 				<div class="form-check form-switch">
-				  <input class="form-check-input" type="checkbox" id="buttonsActiveSwitch" checked>
+				  <input class="form-check-input" type="checkbox" id="buttonsActiveSwitch" checked role="switch" aria-checked="true">
 				  <label class="form-check-label" for="buttonsActiveSwitch">Buttons active</label>
 				</div>
 
 				<div class="form-floating">
-					<select class="form-select" id="view" aria-label = "view">
+					<select class="form-select" id="view">
 					    <option selected>Entire draft</option>
 					    <option>Threading</option>
 					    <option>Treadling</option>
@@ -92,7 +92,7 @@
 				</div>
 
 				<div class="form-floating">
-					<select class="form-select" id="mode" aria-label = "Mode">
+					<select class="form-select" id="mode">
 					    <option selected>Read</option>
 					    <option>Edit</option>
 					</select>
@@ -100,7 +100,7 @@
 				</div>
 
 				<div class="form-floating">
-					<select class="form-select" id="audioFormat" aria-label = "audio format">
+					<select class="form-select" id="audioFormat">
 					    <option selected>Musical</option>
 					    <option>Verbal</option>
 					</select>
@@ -108,7 +108,7 @@
 				</div>
 
 				<div class="form-floating">
-					<select class="form-select" id="verbosity" aria-label = "Text-to-speech Verbosity">
+					<select class="form-select" id="verbosity">
 					    <option>High</option>
 					    <option selected>Low</option>
 					</select>
@@ -149,7 +149,7 @@
 
 				<!-- <div class="btn-group btn-group-sm" role="group" aria-label="threading button groups"> -->
 
-					<button class="btn btn-primary btn-sm" data-playing="false" id="threading-play" role="switch" aria-checked="false">
+					<button class="btn btn-primary btn-sm" data-playing="false" id="threading-play" aria-label="Play threading">
 						<span>Play Threading</span>
 					</button>
 
@@ -190,13 +190,13 @@
 					<label for="weftInstrument">Instrument</label>
 				</div>
 
-				<div class="btn-group btn-group-sm" role="group" aria-label="threading button groups">
+				<div class="btn-group btn-group-sm" role="group" aria-label="treadling button groups">
 
-					<button class="btn btn-primary btn-sm" data-playing="false" id="treadling-play" role="switch" aria-checked="false">
+					<button class="btn btn-primary btn-sm" data-playing="false" id="treadling-play" aria-label="play treadling" >
 						<span>Play Treadling</span>
 					</button>
 
-					<button class="btn btn-danger btn-sm" data-playing="false" id="treadlingClear" role="switch" aria-checked="false">
+					<button class="btn btn-danger btn-sm" data-playing="false" id="treadlingClear" aria-label="clear treadling">
 						<span>Clear</span>
 					</button>
 
@@ -207,7 +207,7 @@
 				<span class="settingsText"> Drawdown</span>
 
 				<div class="form-floating">
-					<select class="form-select" id="drawdownSound" aria-label = "Drawdown Sounds">
+					<select class="form-select" id="drawdownSound" aria-label = "Drawdown Sounds on for">
 					    <option selected>Warp & Weft</option>
 					    <option>Warp only</option>
 					    <option>Weft only</option>
@@ -243,11 +243,11 @@
 					<label for="tieupOption">Other change</label>
 				</div> -->
 
-				<div class="btn-group btn-group-sm" role="group" aria-label="threading button groups">
-					<button class="btn btn-primary btn-sm" data-playing="false" id="tieup-play" role="switch" aria-checked="false">
+				<div class="btn-group btn-group-sm" role="group" aria-label="tieup button groups">
+					<button class="btn btn-primary btn-sm" data-playing="false" id="tieup-play" aria-label="play tieup">
 						<span>Play Tie-up</span>
 					</button>
-					<button class="btn btn-danger btn-sm" data-playing="false" id="tieupClear" role="switch" aria-checked="false">
+					<button class="btn btn-danger btn-sm" data-playing="false" id="tieupClear" aria-label = "clear tieup">
 						<span>Clear</span>
 					</button>
 				</div>
