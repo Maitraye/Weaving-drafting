@@ -284,6 +284,7 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 	  	// When multi-touch happens in different heddles, that can be detected as double-tap. 
 	  	// To address that, calculating if double tap happened within a very close region. 
 		  if (Math.abs(event.changedTouches[0].pageX - lastTouchEventX) < 50 && Math.abs(event.changedTouches[0].pageY - lastTouchEventY) < 50) {
+		  	
 		  	if (gridType == "threading") {
 
 		  		// to make sure that only one is selected in a column of heddles
@@ -309,8 +310,8 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 					updateDraft();
 		  	}
 
-		  	// for both treadling and tieup
-		  	else {
+		  	
+		  	else if (gridType == "treadling") {
 		  		if (element.selected) {
 						element.selected = false;
 						element.fill("#fff");
@@ -320,14 +321,9 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 							audioListPlay([earconFileNames.silence, ttsFilenames.off]);
 						}
 						else {
-							if (gridType == "treadling") {
-								audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
-								ttsFilenames.weft, ttsFilenames[element.weftNumber], ttsFilenames.off]);
-							}
-							else if (gridType == "tieup") { // Verbal is not implemented for tie-up; so no need to add silence
-								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
-									ttsFilenames.shaft, ttsFilenames[element.weftNumber], ttsFilenames.notTiedup]);
-							}
+							// adding a silence first so that verbal announcement for single tap does not get overridden 
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+							ttsFilenames.weft, ttsFilenames[element.weftNumber], ttsFilenames.off]);
 						}
 					}
 					else {
@@ -338,14 +334,39 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 							audioListPlay([ttsFilenames.on]);
 						}
 						else {
-							if (gridType == "treadling") {
-								audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
-									ttsFilenames.weft, ttsFilenames[element.weftNumber], ttsFilenames.on]);
-							}
-							else if (gridType == "tieup") { // Verbal is not implemented for tie-up; so no need to add silence
-								audioListPlay([ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
-									ttsFilenames.shaft, ttsFilenames[element.weftNumber], ttsFilenames.tiedup]);
-							}
+							// adding a silence first so that verbal announcement for single tap does not get overridden 
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+								ttsFilenames.weft, ttsFilenames[element.weftNumber], ttsFilenames.on]);
+						}
+					}
+					updateDraft();
+		  	}
+		  	// for tieup
+		  	else {
+		  		if (element.selected) {
+						element.selected = false;
+						element.fill("#fff");
+						draftSequence[element.treadleNumber] = csvRemove(draftSequence[element.treadleNumber], element.weftNumber);
+						
+						if (verbosity == "Low") {
+							audioListPlay([earconFileNames.silence, ttsFilenames.off]);
+						}
+						else {
+							// Verbal announcement for single tap is not implemented for tie-up; so no need to add silence
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+								ttsFilenames.shaft, ttsFilenames[element.weftNumber], ttsFilenames.notTiedup]);
+						}
+					}
+					else {
+						element.selected = true;
+						element.fill(cellColor);
+						draftSequence[element.treadleNumber] = csvAdd(draftSequence[element.treadleNumber], element.weftNumber);
+						if (verbosity == "Low") {
+							audioListPlay([earconFileNames.silence, ttsFilenames.on]);
+						}
+						else {
+							audioListPlay([earconFileNames.silence, ttsFilenames.treadle, ttsFilenames[element.treadleNumber], 
+								ttsFilenames.shaft, ttsFilenames[element.weftNumber], ttsFilenames.tiedup]);
 						}
 					}
 					updateDraft();
@@ -354,7 +375,7 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
 		}
 
     event.preventDefault(); // to prevent the default zoom event on double-tap
-  } 
+  }
   else { //single tap detected
 
   	// this is same as mouseout function
@@ -368,6 +389,7 @@ function tapHandler(element, gridType, draftSequence, cellColor, event) {
   lastTap = currentTime;
   lastTouchEventX = event.changedTouches[0].pageX;
   lastTouchEventY = event.changedTouches[0].pageY;
+
 }
 
 // ------- Draft display and manipulation ----------
